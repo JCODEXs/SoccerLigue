@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -9,12 +10,89 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
-      <body>{children}</body>
+    <html lang="en">
+      <body
+        className={`${GeistSans.variable}  antialiased  flex flex-col min-h-screen`}
+      >
+        {/* Header Container */}
+        <div className="fixed top-0 left-0 w-full z-50">
+          {/* Header */}
+          <header className="group">
+            <div
+              className="transition-all duration-300 ease-in-out transform -translate-y-full group-hover:translate-y-0"
+              style={{
+                backgroundImage: "url('/backgroundheader.png')", // Add your header background image
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              <ul className="flex flex-col @max-md:flex-col gap-4 p-6 text-xl items-center">
+                <li className="hover:bg-teal-700 px-4 py-2 rounded-md transition-colors duration-200 group-hover:text-terracotta-100">
+                  <Link href="/program-match">Program new match</Link>
+                </li>
+                <li className="hover:bg-teal-800 px-4 py-2 rounded-md transition-colors duration-200 group-hover:text-terracotta-100">
+                  <Link href="/fill-results">Fill match results</Link>
+                </li>
+                <li className="hover:bg-teal-900 px-4 py-2 rounded-md transition-colors duration-200 group-hover:text-terracotta-100">
+                  <Link href="/view-results">View results</Link>
+                </li>
+                <li className="hover:bg-teal-900 px-4 py-2 rounded-md transition-colors duration-200 group-hover:text-terracotta-100">
+                  <Link href="/login">Login</Link>
+                </li>
+              </ul>
+            </div>
+          </header>
+        </div>
+
+        {/* Main Content */}
+        <div
+          className="pt-16 flex-grow " // Add padding to avoid content overlap with the header
+          style={{
+            backgroundImage: "url('/background.jpg')", // Add your page background image
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          {children}
+        </div>
+        {/* Footer */}
+        <footer className="bg-teal-900 text-white py-6">
+          <div className="container mx-auto px-4 flex items-center justify-between">
+            {/* Left Logo */}
+            <div className="w-32">
+              <img
+                src="Seal_of_Arcata.png"
+                alt="Left Logo"
+                className="w-full h-auto"
+              />
+            </div>
+
+            {/* Middle Text */}
+            <div className="text-center">
+              <p className="text-sm md:text-base">
+                This software is designed to record and consult local league
+                soccer scores and statistics.
+              </p>
+              <p className="text-xs md:text-sm mt-2 text-terracotta-100">
+                © {new Date().getFullYear()} Local League Soccer. All rights
+                reserved.
+              </p>
+            </div>
+
+            {/* Right Logo */}
+            <div className="w-24">
+              <img
+                src="/humboldsoccer.jpg"
+                alt="Right Logo"
+                className="w-full h-auto rounded-full"
+              />
+            </div>
+          </div>
+        </footer>
+      </body>
     </html>
   );
 }
+
