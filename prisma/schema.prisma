@@ -13,6 +13,15 @@ datasource db {
     // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
     url      = env("DATABASE_URL")
 }
+model Match {
+  id        Int      @id @default(autoincrement())
+  homeTeam  String
+  awayTeam  String
+  date      DateTime
+  time      String
+  location  String
+  createdAt DateTime @default(now())
+}
 
 model Post {
     id        Int      @id @default(autoincrement())
