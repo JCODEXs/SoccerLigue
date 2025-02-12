@@ -1,12 +1,55 @@
 -- CreateTable
+CREATE TABLE "Location" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CreateTable
+CREATE TABLE "Team" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CreateTable
+CREATE TABLE "Player" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "position" TEXT NOT NULL,
+    "number" INTEGER NOT NULL,
+    "teamId" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Player_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "Team" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Event" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "type" TEXT NOT NULL,
+    "team" TEXT NOT NULL,
+    "player" TEXT NOT NULL,
+    "assistant" TEXT,
+    "substitute" TEXT,
+    "card" TEXT,
+    "timestamp" TEXT NOT NULL,
+    "matchId" TEXT NOT NULL,
+    CONSTRAINT "Event_matchId_fkey" FOREIGN KEY ("matchId") REFERENCES "Match" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- CreateTable
 CREATE TABLE "Match" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "homeTeam" TEXT NOT NULL,
-    "awayTeam" TEXT NOT NULL,
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "homeTeamId" TEXT NOT NULL,
+    "awayTeamId" TEXT NOT NULL,
+    "locationId" TEXT NOT NULL,
     "date" DATETIME NOT NULL,
     "time" TEXT NOT NULL,
-    "location" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "judge" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Match_homeTeamId_fkey" FOREIGN KEY ("homeTeamId") REFERENCES "Team" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Match_awayTeamId_fkey" FOREIGN KEY ("awayTeamId") REFERENCES "Team" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Match_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "Location" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -61,6 +104,12 @@ CREATE TABLE "VerificationToken" (
     "token" TEXT NOT NULL,
     "expires" DATETIME NOT NULL
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Location_name_key" ON "Location"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Team_name_key" ON "Team"("name");
 
 -- CreateIndex
 CREATE INDEX "Post_name_idx" ON "Post"("name");

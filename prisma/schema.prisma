@@ -13,15 +13,62 @@ datasource db {
     // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
     url      = env("DATABASE_URL")
 }
-model Match {
-  id        Int      @id @default(autoincrement())
-  homeTeam  String
-  awayTeam  String
-  date      DateTime
-  time      String
-  location  String
+model Location {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  matches   Match[]
   createdAt DateTime @default(now())
 }
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  players   Player[]
+  matchesHome Match[] @relation(name: "HomeMatches")
+  matchesAway Match[] @relation(name: "AwayMatches")
+  createdAt DateTime @default(now())
+}
+
+model Player {
+  id        String   @id @default(cuid())
+  name      String
+  position  String
+  number    Int
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id         String  @id @default(uuid())
+  type       String
+  team       String
+  player     String
+  assistant  String? 
+  substitute String? 
+  card       String? 
+  timestamp  String
+  matchId    String
+  match      Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+}
+
+model Match {
+  id         String   @id @default(cuid())
+  homeTeamId String
+  awayTeamId String
+  locationId String
+  date       DateTime
+  time       String
+  judge      String
+  events     Event[]
+  homeTeam   Team     @relation(name: "HomeMatches", fields: [homeTeamId], references: [id])
+  awayTeam   Team     @relation(name: "AwayMatches", fields: [awayTeamId], references: [id])
+  location   Location @relation(fields: [locationId], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+
+
 
 model Post {
     id        Int      @id @default(autoincrement())

@@ -1,29 +1,20 @@
-# Create T3 App
+# funcionalidades
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+# programar partido
 
-## What's next? How do I make an app with this?
+campo de programacion de partido con hora equipo local y vistante y administrador del partido
+.adicionar selector de arbitro y administrador del partido y generar contraseña visible para el administrador.
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+#listado de partidos programados
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+lista de partidos programados organizados por fecha de inicio en donde salgan los campos de equipos local y visitante lugar del partido y hora y fecha con los filtros de equipos y fechas.
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+#listados de partidos por jugar para llenar estadisticas
 
-## Learn More
+lista de partidos ya jugados organizados por fecha de inicio en donde salgan los campos de equipos local y visitante lugar del partido y hora y fecha con los filtros de equipos y fechas. cuya seleccion individual nos lleve a la pantalla de edicion de resultados de los partidos
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+@# panel de edicion de resultados en donde podamos editar las estadisticas de los partidos ya jugados esta pantalla solo visible en modo administrador y habilitada para editar los resultados con una contraseña que solo posee el arbitro o administrador del partido la cual devemos generar al momento de programar el partido
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+#panel de usuario para arbitros y jugadores donde se cofiguren los datos personales de los miembros de la liga para luego ligarlos con las estadisticas de los goles y demas estadisticas.
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
-
-## How do I deploy this?
-
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+# visualizador de estadisticas de jugador por partido y por temporada acomulativo con resgistros como goles faltas asistencias.

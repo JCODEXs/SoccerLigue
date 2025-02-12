@@ -1,29 +1,33 @@
 "use client"; // Marca el componente como del lado del cliente
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar"; // DatePicker de shadcn/ui
 import { Input } from "@/components/ui/input"; // Input de shadcn/ui
 import { Button } from "@/components/ui/button"; // Button de shadcn/ui
 import { useMatchStore } from "@/app/stores/matchStore";
-import { saveMatchToDatabase } from "@/app/actions/actions"; 
+import { getTeamsAndLocations, saveMatchToDatabase } from "@/app/actions/actions"; 
 
 
-// Lista de equipos disponibles
-const teams = [
-  "Team A",
-  "Team B",
-  "Team C",
-  "Team D",
-  "Team E",
+
+
+const judges = [
+  "judge A",
+  "judge B",
+  "judge C",
+  "judge D",
+  "judge E",
 ];
 
 const ProgramMatch: React.FC = () => {
   // Estados para los equipos, fecha, hora y lugar
-  const [homeTeam, setHomeTeam] = useState<string>("");
-  const [awayTeam, setAwayTeam] = useState<string>("");
+  const [homeTeamId, setHomeTeam] = useState<string>("");
+  const [awayTeamId, setAwayTeam] = useState<string>("");
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [time, setTime] = useState<string>("10:50");
-  const [location, setLocation] = useState<string>("");
+  const [locationId, setLocation] = useState<string>("");
+  const [judge, setJudge] = useState<string>("");
+  const [teams, setTeams] = useState<[]>([]);
+  const [Locations, setLocations] = useState<[]>([]);
 
   // Zustand store para manejar el estado local
   const { addMatch } = useMatchStore();
@@ -33,18 +37,19 @@ const ProgramMatch: React.FC = () => {
     e.preventDefault();
 
     // Validar que todos los campos estén llenos
-    if (!homeTeam || !awayTeam || !date || !time || !location) {
+    if (!homeTeamId || !awayTeamId || !date || !time || !location) {
       alert("Please fill in all fields.");
       return;
     }
 
     // Crear el objeto del partido
     const match = {
-      homeTeam,
-      awayTeam,
+      homeTeamId,
+      awayTeamId,
       date,
       time,
-      location,
+      locationId,
+      judge,
     };
 
     try {
@@ -64,6 +69,18 @@ const ProgramMatch: React.FC = () => {
     }
   };
 
+  useEffect(()=>{
+    // Lista de equipos disponibles
+    async function dataFetch(){
+
+      const TeamsandLocations = await getTeamsAndLocations()
+      console.log("teams",TeamsandLocations)
+      const {teams,Locations} = TeamsandLocations
+      setTeams(teams)
+      setLocations(Locations)
+    }
+dataFetch()
+  },[])
   return (
     <div className="bg-gray-800 text-white p-6 rounded-lg shadow-lg w-full max-w-2xl mx-auto">
       <h2 className="text-3xl font-bold text-center mb-6 text-orange-400">
@@ -75,16 +92,16 @@ const ProgramMatch: React.FC = () => {
         <div className="space-y-2">
           <label className="text-lg text-teal-400">Home Team</label>
           <select
-            value={homeTeam}
+            value={homeTeamId}
             onChange={(e) => setHomeTeam(e.target.value)}
             className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400"
           >
             <option value="" disabled>
               Select a team
             </option>
-            {teams.map((team) => (
-              <option key={team} value={team}>
-                {team}
+            {teams?.map((team) => (
+              <option key={team.id} value={team.id}>
+                {team.name}
               </option>
             ))}
           </select>
@@ -94,16 +111,16 @@ const ProgramMatch: React.FC = () => {
         <div className="space-y-2">
           <label className="text-lg text-terracotta-400">Away Team</label>
           <select
-            value={awayTeam}
+            value={awayTeamId}
             onChange={(e) => setAwayTeam(e.target.value)}
             className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-terracotta-400"
           >
             <option value="" disabled>
               Select a team
             </option>
-            {teams.map((team) => (
-              <option key={team} value={team}>
-                {team}
+            {teams?.map((team) => (
+              <option key={team.id} value={team.id}>
+                {team.name}
               </option>
             ))}
           </select>
@@ -137,13 +154,34 @@ const ProgramMatch: React.FC = () => {
            {/* Match Location */}
         <div className="mt-6 space-y-2">
           <label className="text-lg text-orange-400">Match Location</label>
-          <Input
-            type="text"
-            value={location}
+          <select
+            value={locationId}
             onChange={(e) => setLocation(e.target.value)}
-            placeholder="Enter the match location"
             className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
-            />
+            >
+              <option value="" disabled>
+                </option>
+                Select a location
+                {Locations.map((location)=>
+               
+                <option  key={location.id} value={location.id}>{location.name}</option>)}
+             </select> 
+        </div>
+           {/* Match judge */}
+        <div className="mt-6 space-y-2">
+          <label className="text-lg text-orange-400">Match judge</label>
+          <select
+            value={judge}
+            onChange={(e) => setJudge(e.target.value)}
+            className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+            >
+              <option value="" disabled>
+                </option>
+                Select a judge
+                {judges.map((judge)=>
+               
+                <option  key={judge} value={judge}>{judge}</option>)}
+             </select> 
         </div>
             </div>
         </div>

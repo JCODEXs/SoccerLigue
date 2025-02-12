@@ -20,7 +20,9 @@ export default function RootLayout({ children }) {
         {/* Header Container */}
         <div className="fixed top-0 left-0 w-full z-50">
           {/* Header */}
-          <header className="h-6 group">
+          <header className="h-10 group">
+          <p className="flex justify-center text-white p-1"> OPTIONS</p>
+    
             <div
               className="transition-all duration-300 ease-in-out transform -translate-y-full group-hover:translate-y-0"
               style={{
@@ -40,19 +42,21 @@ export default function RootLayout({ children }) {
     <Link href="/view-results">View results</Link>
   </li>
   <li key="view-program" className="hover:bg-teal-900 px-4 py-2 rounded-md transition-colors duration-200 group-hover:text-terracotta-100">
-    <Link href="/view-program">View Programing</Link>
+    <Link href="/matches">View Programing</Link>
   </li>
   <li key="login" className="hover:bg-teal-900 px-4 py-2 rounded-md transition-colors duration-200 group-hover:text-terracotta-100">
     <Link href="/login">Login</Link>
   </li>
 </ul>
+<p className="flex justify-center text-white z-1 pt-2  group-hover:sr-only group-hover:h-2"> OPTIONS </p>
             </div>
+            
           </header>
         </div>
 
         {/* Main Content */}
         <div
-          className="pt-12 flex-grow " // Add padding to avoid content overlap with the header
+          className="pt-10 flex-grow " // Add padding to avoid content overlap with the header
           style={{
             backgroundImage: "url('/background.jpg')", // Add your page background image
             backgroundSize: "cover",

@@ -4,16 +4,16 @@ import Scoreboard from "@/components/scoreBoard";
 export default function HomePage() {
    const matchData = {
     Date: "2025-02-28",
-    teamA: "Team A",
-    teamB: "Team B",
+    homeTeam: "Team A",
+    awayTeam: "Team B",
     scoreA: 2,
     scoreB: 1,
     stats: {
-      shots: { teamA: 10, teamB: 8 },
-      shotsOnTarget: { teamA: 5, teamB: 3 },
-      corners: { teamA: 4, teamB: 2 },
-      fouls: { teamA: 12, teamB: 15 },
-      cards: { teamA: 2, teamB: 3 },
+      shots: { homeTeam: 10, awayTeam: 8 },
+      shotsOnTarget: { homeTeam: 5, awayTeam: 3 },
+      corners: { homeTeam: 4, awayTeam: 2 },
+      fouls: { homeTeam: 12, awayTeam: 15 },
+      cards: { homeTeam: 2, awayTeam: 3 },
     },
   };
   return (
