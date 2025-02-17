@@ -18,23 +18,23 @@ CREATE TABLE "Player" (
     "name" TEXT NOT NULL,
     "position" TEXT NOT NULL,
     "number" INTEGER NOT NULL,
-    "teamId" TEXT NOT NULL,
+    "teamId" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "Player_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "Team" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "Player_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "Team" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "Event" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "type" TEXT NOT NULL,
-    "team" TEXT NOT NULL,
+    "team" TEXT,
     "player" TEXT NOT NULL,
     "assistant" TEXT,
     "substitute" TEXT,
     "card" TEXT,
     "timestamp" TEXT NOT NULL,
-    "matchId" TEXT NOT NULL,
-    CONSTRAINT "Event_matchId_fkey" FOREIGN KEY ("matchId") REFERENCES "Match" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "matchId" TEXT,
+    CONSTRAINT "Event_matchId_fkey" FOREIGN KEY ("matchId") REFERENCES "Match" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -49,16 +49,16 @@ CREATE TABLE "Score" (
 -- CreateTable
 CREATE TABLE "Match" (
     "id" TEXT NOT NULL PRIMARY KEY,
-    "homeTeamId" TEXT NOT NULL,
-    "awayTeamId" TEXT NOT NULL,
+    "homeTeamId" TEXT,
+    "awayTeamId" TEXT,
     "locationId" TEXT NOT NULL,
     "date" DATETIME NOT NULL,
     "time" TEXT NOT NULL,
     "judge" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "Match_homeTeamId_fkey" FOREIGN KEY ("homeTeamId") REFERENCES "Team" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "Match_awayTeamId_fkey" FOREIGN KEY ("awayTeamId") REFERENCES "Team" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Match_homeTeamId_fkey" FOREIGN KEY ("homeTeamId") REFERENCES "Team" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT "Match_awayTeamId_fkey" FOREIGN KEY ("awayTeamId") REFERENCES "Team" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "Match_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "Location" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
