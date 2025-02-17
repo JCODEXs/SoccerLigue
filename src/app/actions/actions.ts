@@ -118,10 +118,13 @@ export async function saveMatchData({ matchData }: { matchData: MatchData }) {
     console.log("Match and events saved successfully!");
     return { success: true, match: updatedMatch };
 
-  } catch (error) {
-    console.error("Error saving match data:", error);
-    return { success: false, message: error.message || "Internal server error" };
-  }
+  }  catch (error) {
+  console.error("Error saving match data:", error);
+  return { 
+    success: false, 
+    message: (error as Error).message || "Internal server error" 
+  };
+
 }
 
 
