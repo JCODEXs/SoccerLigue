@@ -17,8 +17,14 @@ const { slug } = use(params);
       try {
          if (!slug) return;
         const matchData = await findMatch(slug);
-        const { events: GameEvents } = matchData;
-        console.log("este",matchData)
+     
+if (!matchDataP) {
+  console.error("Match not found");
+  return;
+}
+
+const { events: GameEvents } = matchDataP; // Now it's safe to destructure
+console.log("este", matchDataP);
         const generatedData = generateMatchData(GameEvents);
         setMatchSummary(generatedData);
       } catch (error) {
