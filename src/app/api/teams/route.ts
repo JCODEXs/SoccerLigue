@@ -18,7 +18,7 @@ export async function GET() {
     const teams = await db.team.findMany({ include: { players: true } });
     return NextResponse.json({ success: true, teams });
   } catch (error) {
-    console.error("Error fetching teams:", error.stack || error);
+    console.error("Error fetching teams:", (error as Error).stack || error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch teams. Please try again later." },
       { status: 500 }
@@ -69,7 +69,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, team: newTeam }, { status: 201 });
   } catch (error) {
-    console.error("Error creating team:", error.stack || error);
+    console.error("Error creating team:", (error as Error).stack || error);
     return NextResponse.json(
       { success: false, message: "Failed to create team. Please try again later." },
       { status: 500 }
@@ -124,7 +124,7 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({ success: true, player: newPlayer }, { status: 201 });
   } catch (error) {
-    console.error("Error adding player:", error.stack || error);
+    console.error("Error adding player:", (error as Error).stack || error);
     return NextResponse.json(
       { success: false, message: "Failed to add player. Please try again later." },
       { status: 500 }
