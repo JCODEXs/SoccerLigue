@@ -1,10 +1,9 @@
-import ScheduledMatches from "@/components/scheduledMatches";
-
+import CreateTeam from "@/components/createTeams";
 
 const MatchesPage = () => {
   return (
     <div className="min-h-screen  p-2 sm:p-6">
-      <ScheduledMatches />
+      <CreateTeam />
     </div>
   );
 };

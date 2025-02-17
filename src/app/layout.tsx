@@ -36,7 +36,7 @@ export default function RootLayout({ children }) {
     <Link href="/program-match">Program new match</Link>
   </li>
   <li key="fill-results" className="hover:bg-teal-800 px-4 py-2 rounded-md transition-colors duration-200 group-hover:text-terracotta-100">
-    <Link href="/fill-results">Fill match results</Link>
+    <Link href="/teams">Teams</Link>
   </li>
   <li key="view-results" className="hover:bg-teal-900 px-4 py-2 rounded-md transition-colors duration-200 group-hover:text-terracotta-100">
     <Link href="/view-results">View results</Link>

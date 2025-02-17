@@ -9,7 +9,18 @@ export async function findMatch(id: string) {
     },
     include: {
       events: true, // 
+      homeTeam:{
+        select: {name:true}
+      },
+      awayTeam:{
+        select: {name:true}
+      }
+ 
     },
+    
+   
+   
+
   });
 
   return match;
@@ -53,15 +64,30 @@ type MatchEvent = {
   type MatchData = {
   events: MatchEvent[];
   matchId: string;
+  homeTeam:string;
+  awayTeam:string;
 };
+
 export async function saveMatchData({ matchData }: { matchData: MatchData }) {
-  console.log("matchdata",matchData)
-  const {events,matchId }:MatchData= matchData
+  console.log("Saving match data:", matchData);
+
+  const { events, matchId, homeTeam, awayTeam }: MatchData = matchData;
+
   try {
-    if (!events || !matchId ) {
+    if (!events || !matchId || !homeTeam || !awayTeam) {
       throw new Error("Missing required fields");
     }
+
+    
+    const homeScore = events.filter((e) => e.team === homeTeam && e.type === "goal").length;
+    const awayScore = events.filter((e) => e.team === awayTeam && e.type === "goal").length;
+   
+
+    // If there are events, process and save them
     if (events.length > 0) {
+      // Calculate score
+
+      // Format event data for bulk insertion
       const formattedEvents = events.map((event) => ({
         type: event.type,
         team: event.team,
@@ -70,17 +96,35 @@ export async function saveMatchData({ matchData }: { matchData: MatchData }) {
         substitute: event.substitute || null,
         card: event.card || null,
         timestamp: event.timestamp,
-        matchId: matchId, // Link event to match
+        matchId, // Link event to match
       }));
 
+      // Insert events into the database
       await prisma.event.createMany({ data: formattedEvents });
     }
 
-    console.log("Match saved successfully!");
-    return { success: true};
+    // Update match with score
+   const updatedMatch = await prisma.match.update({
+  where: {
+    id: matchId,
+  },
+  data: {
+    score: {
+      upsert: {
+        create: { homeScore: homeScore, awayScore: awayScore }, 
+       update: { homeScore: homeScore, awayScore: awayScore },
+      },
+    },
+  },
+});
+
+
+    console.log("Match and events saved successfully!");
+    return { success: true, match: updatedMatch };
+
   } catch (error) {
-    console.error("Error saving match to database:", error);
-    return { success: false, message: "Internal server error" };
+    console.error("Error saving match data:", error);
+    return { success: false, message: error.message || "Internal server error" };
   }
 }
 

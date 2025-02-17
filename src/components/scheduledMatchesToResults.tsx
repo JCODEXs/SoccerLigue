@@ -3,6 +3,10 @@
 import { formatDateToLetters } from "@/lib/utils";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFutbol } from "@fortawesome/free-solid-svg-icons";
 
 interface Match {
   id: number;
@@ -12,9 +16,10 @@ interface Match {
   time: string;
   location: string;
   judge: string;
+  events:[]
 }
 
-const ScheduledMatches: React.FC = () => {
+const ScheduledMatchesToResults: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [teamFilter, setTeamFilter] = useState<string>("");
@@ -78,13 +83,13 @@ console.log("match",data)
   }, [teamFilter, dateFilter, matches]);
 
   return (
-    <div className="p-2 bg-gray-800 text-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-4 text-orange-400">
+    <div className="p-3 bg-gray-800 text-white rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold mb-3 text-orange-400">
         Scheduled Matches
       </h2>
 
       {/* Filtros */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row gap-2 mb-5">
         <select
           value={teamFilter}
           onChange={(e) => setTeamFilter(e.target.value)}
@@ -111,31 +116,31 @@ console.log("match",data)
         {filteredMatches.length > 0 ? (
           filteredMatches.map((match) => (
             <div
-              className="p-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors duration-200"
+              className="p-1 bg-gray-700 rounded-sm hover:bg-gray-600 transition-colors duration-200 sm:p-3"
               key={match.id}
             >
             
-            <Link href={`/matchesDetails/${match.id}`}>
+            <Link href={`/view-results/${match.id}`}>
            
             
               <div className="flex flex-col justify-between items-center">
-                <div className="text-lg font-bold text-orange-400">
-                  {match.homeTeam.name} vs {match.awayTeam.name}
+                <div className="text-lg font-bold text-orange-400  ">
+                {match?.events&&<FontAwesomeIcon icon={faFutbol} size="1x" color="white" />}  {match.homeTeam.name} vs {match.awayTeam.name} 
                 </div>
-                <div className="text-lg text-gray-300 px-2 pt-1">
+                <div className="text-md gap-2 flex text-gray-300 flex-col sm:flex-row">
                   {formatDateToLetters(match.date)} at {match.time}
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-
-              <div className="text-sm text-gray-400 m-2">
+              <div className="flex justify-between gap-2 items-center md:flex-row">
+              <div className="text-sm text-gray-300 ">
                 {/* Location:  */}
                 {match.location.name}
               </div>
-              <div className="text-sm text-gray-400 mt-2 px-6">
+              <div className="text-sm text-gray-300  ">
                 Referee: {""}
                 {match?.judge}
               </div>
+                </div>
+              </div>
+
             </div>
               </Link>
             </div>
@@ -148,4 +153,4 @@ console.log("match",data)
   );
 };
 
-export default ScheduledMatches;
+export default ScheduledMatchesToResults;

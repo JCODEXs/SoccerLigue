@@ -40,8 +40,9 @@ interface Event {
 }
 
 const FillResults: React.FC<{ match: Match }> = ({ match }) => {
+  console.log(match)
   const { homeTeamId, awayTeamId, homeTeam, awayTeam,id,date,locationId } = match;
-  const [selectedTeam, setSelectedTeam] = useState<string>(homeTeam.name);
+  const [selectedTeam, setSelectedTeam] = useState<string>(homeTeam?.name);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [card, setCard] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<string>("goal");
@@ -61,7 +62,9 @@ const FillResults: React.FC<{ match: Match }> = ({ match }) => {
   const handleSave = async () => {
   const matchData = {
     events,
-    matchId: id
+    matchId: id,
+    homeTeam:homeTeam.name,
+    awayTeam:awayTeam.name,
   };
 console.log("dataindetails",matchData)
   const response = await saveMatchData({matchData});
@@ -210,8 +213,17 @@ const updateAvailablePlayers = (event: Event) => {
 
   return (
     <div className="p-1">
-      <div className="p-4 bg-gray-800 rounded-lg shadow-md w-full max-w-2xl mx-auto text-white">
-        <h2 className="text-xl font-bold text-orange-500">Manage Match Events</h2>
+     
+      <div className="p-1 bg-gray-800 rounded-lg shadow-md w-full max-w-2xl mx-auto text-white">
+        <div className="flex flex-row justify-between">
+          <h2 className="text-xl font-bold text-orange-500 flex-grow-1 w-1/2 p-2">Manage Match Events</h2>  
+           <button
+            className="m-2 bg-teal-600 text-white text-lg p-2 rounded border-teal-700  "
+            onClick={handleSave}
+          >
+            Save match
+          </button>
+        </div>
         {/* Team Selection */}
         <div className="mt-4">
           <label className="block font-semibold">Select Team</label>
@@ -415,33 +427,28 @@ const updateAvailablePlayers = (event: Event) => {
         )}
         {/* Add Event Button */}
         <button
-          className="mt-4 bg-teal-500 text-white px-4 py-2 rounded w-full"
+          className="mt-3 bg-teal-700 text-white py-2 my-2 rounded w-full"
           onClick={handleAddEvent}
         >
           Add Event
         </button>
       </div>
-      <div className="m-4 flex flex-col justify-center items-center">
-          <button
-          className="mt-4 bg-teal-600 text-white text-lg text-semibold px-4 py-2 rounded w-full border-teal-700 w-1/2 "
-          onClick={handleSave}
-        >
-          Save match events
-        </button>
+      <div className="flex flex-col justify-center items-center">
+        
         {/* Events List */}
-        <div className="mt-6 p-4 bg-gray-700 rounded-lg shadow-lg border border-gray-700 w-full">
-          <h3 className="text-lg font-bold text-orange-400">Match Events</h3>
+        <div className="mt-3   rounded-lg shadow-lg  w-full">
+          <h3 className="text-xl font-bold text-teal-900 text-center">Match Events</h3>
           {events.length === 0 ? (
             <p className="text-gray-400 italic mt-2">No events added yet.</p>
           ) : (
-            <ul className="mt-3 space-y-2">
+            <ul className="mt-1 space-y-2">
               {events.map((event, index) => (
                 <li
                   key={index}
-                  className="grid grid-cols-4 bg-gray-800 p-3 items-center rounded-md shadow transition hover:bg-gray-900"
+                  className="grid grid-cols-4 bg-gray-800  items-center rounded-md shadow transition hover:bg-gray-900"
                 >
                   <div className="flex flex-col items-center justify-end">
-                    <span className="text-red-400 font-bold">{event.type}</span>
+                    <span className="text-red-400 font-bold ">{event.type}</span>
                     {event.assistant && event.type==="goal" && (
                       <span className="text-gray-400 italic text-sm">(Assist: {event.assistant})</span>
                     )}
@@ -450,10 +457,10 @@ const updateAvailablePlayers = (event: Event) => {
                     )}
                   </div>
                   <div className="flex flex-col items-center justify-end">
-                     <span className="text-red-600 font-medium">{event.player}</span>
-                  {event.type==="substitution" && <span className="text-teal-600 font-medium">{event.substitute}</span>}
+                     <span className="text-blue-400 font-sm">{event.player}</span>
+                  {event.type==="substitution" && <span className="text-teal-600 font-sm">{event.substitute}</span>}
                     </div>
-                  <span className="text-gray-300 font-medium">{event.team}</span>
+                  <span className="text-gray-300 font-sm">{event.team}</span>
                       <span className="font-semibold text-teal-600">{event.timestamp}</span>
                 </li>
               ))}

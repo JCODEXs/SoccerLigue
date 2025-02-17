@@ -1,26 +1,48 @@
 "use client"
+import { findMatch } from "@/app/actions/actions";
 import Details from "@/components/Details";
 import FillResults from "@/components/fillResults";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 
-const MatchDetails = () => {
-  const searchParams = useSearchParams();
-  const dataParam = searchParams.get("data");
+const  MatchDetails= ({ params,
+}: {
+  params: Promise<{ slug: string }>
+}) =>{
+  
    const [match, setMatch] = useState(null);
   const [isEditable, setIsEditable] = useState(false);
   const [isReadyForResults, setIsReadyForResults] = useState(false);
   const [isResultsAvailable, setIsResultsAvailable] = useState(false);
+   
+const { slug } = use(params);
+  console.log(slug)
+ 
 
   useEffect(() => {
-    if (dataParam) {
+    const fetchMatchData = async () => {
       try {
-        const matchData = JSON.parse(decodeURIComponent(dataParam));
-        setMatch(matchData);
+         if (!slug) return;
+        const matchDataP = await findMatch(slug);
+        const { events: GameEvents } = matchDataP;
+        console.log("este",matchDataP)
+        
+        setMatch(matchDataP);
+      } catch (error) {
+        console.error("Error fetching match data:", error);
+      }
+    };
 
-        const matchDate = new Date(matchData.date); // Match start time
-        const matchCreation = new Date(matchData.createdAt); // When the match was created
+    fetchMatchData();
+  }, []);
+  useEffect(() => {
+    if (match) {
+      try {
+        
+
+        const matchDate = new Date(match?.date); // Match start time
+        const matchCreation = new Date(match?.createdAt); // When the match was created
         const currentDate = new Date()
         const twoHoursAfterMatch = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000); // 2 hours after start
         const matchDuration = 105 * 60 * 1000; // 90 minutes in milliseconds
@@ -44,7 +66,7 @@ const MatchDetails = () => {
         console.error("Error decoding match data:", error);
       }
     }
-  }, [dataParam]);
+  }, [match]);
 
 // If the match is editable, show the Details component
   if (isEditable) {

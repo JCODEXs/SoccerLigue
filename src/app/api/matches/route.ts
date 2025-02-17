@@ -23,6 +23,7 @@ export async function GET(req: Request) {
         name: true, // Include location name if needed
       },
     },
+    events:true
   },
     });
     return new Response(JSON.stringify(matches), { status: 200 });

@@ -82,14 +82,14 @@ const ProgramMatch: React.FC = () => {
 dataFetch()
   },[])
   return (
-    <div className="bg-gray-800 text-white p-6 rounded-lg shadow-lg w-full max-w-2xl mx-auto">
-      <h2 className="text-3xl font-bold text-center mb-6 text-orange-400">
+    <div className="bg-gray-800 text-white p-3 rounded-lg shadow-lg w-full max-w-2xl mx-auto">
+      <h2 className="text-3xl font-bold text-center mb-4 text-orange-400">
         Schedule Match
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Home Team */}
-        <div className="space-y-2">
+        <div className="space-y-1">
           <label className="text-lg text-teal-400">Home Team</label>
           <select
             value={homeTeamId}
@@ -108,7 +108,7 @@ dataFetch()
         </div>
 
         {/* Away Team */}
-        <div className="space-y-2">
+        <div className="space-y-1">
           <label className="text-lg text-terracotta-400">Away Team</label>
           <select
             value={awayTeamId}
@@ -126,11 +126,11 @@ dataFetch()
           </select>
         </div>
 
-        <div className="flex flex-row justify-around ">
+        <div className="flex flex-row justify-around gap-3 ">
         {/* Match Date */}
              <div className="space-y-2">
 
-          <label className="text-lg text-orange-400">Match Date</label>
+          <label className="text-lg text-orange-400">Match Date & Location </label>
           <Calendar
             mode="single"
             selected={date}
@@ -142,7 +142,7 @@ dataFetch()
 
              <div className="space-y-2 flex flex-col">
             {/* Match Time */}
-            <label className="text-lg text-orange-400">Match Time</label>
+            <label className="text-lg text-orange-400">Time</label>
 {/* <TimePicker onChange={setTime} value={time} format="HH:mm"  disableClock={false}/> */}
           <Input
             type="time"
@@ -153,7 +153,7 @@ dataFetch()
         </div>
            {/* Match Location */}
         <div className="mt-6 space-y-2">
-          <label className="text-lg text-orange-400">Match Location</label>
+          <label className="text-lg text-orange-400">Location</label>
           <select
             value={locationId}
             onChange={(e) => setLocation(e.target.value)}
@@ -169,7 +169,7 @@ dataFetch()
         </div>
            {/* Match judge */}
         <div className="mt-6 space-y-2">
-          <label className="text-lg text-orange-400">Match judge</label>
+          <label className="text-lg text-orange-400">Referee</label>
           <select
             value={judge}
             onChange={(e) => setJudge(e.target.value)}

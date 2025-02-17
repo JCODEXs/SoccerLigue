@@ -4,17 +4,18 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create Locations
-  const stadium1 = await prisma.location.create({ data: { name: "Stadium A" } });
-  const stadium2 = await prisma.location.create({ data: { name: "Stadium B" } });
-  const stadium3 = await prisma.location.create({ data: { name: "Stadium C" } });
+  await prisma.location.createMany({
+    data: Array.from({ length: 3 }, () => ({ name: faker.location.city() })),
+  });
 
-  // Create Teams
-  const teamA = await prisma.team.create({ data: { name: "Team A" } });
-  const teamB = await prisma.team.create({ data: { name: "Team B" } });
-  const teamC = await prisma.team.create({ data: { name: "Team C" } });
-  const teamD = await prisma.team.create({ data: { name: "Team D" } });
-  const teamE = await prisma.team.create({ data: { name: "Team E" } });
+  // Crear Equipos
+  await prisma.team.createMany({
+    data: Array.from({ length: 5 }, () => ({ name: faker.company.name() })),
+  });
+
+  console.log("Localidades y equipos creados correctamente.");
+}
+
 
 
 function generatePlayers(teamId: string) {
