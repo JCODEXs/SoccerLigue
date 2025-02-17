@@ -9,6 +9,18 @@ type MatchStats = {
   fouls: { homeTeam: number; awayTeam: number };
   cards: { homeTeam: number; awayTeam: number };
 };
+type MatchEvent = {
+  team: string ;
+  type: string;
+  card: string | null;
+  player: string;
+  id: string;
+  assistant: string | null;
+  substitute: string | null;
+  timestamp: string;
+  matchId: string | null;
+};
+
 
 type MatchData = {
   Date: string;
@@ -50,7 +62,7 @@ const { slug } = use(params);
     fetchMatchData();
   }, []);
 
-  function generateMatchData(events) {
+  function generateMatchData(events: MatchEvent[]) {
     const matchData = {
       Date: "2025-02-28",
       homeTeam: "",
