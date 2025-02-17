@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import type{ ReactNode } from "react";
 
 export const metadata: Metadata = {
   title: "Soccer League",
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body
