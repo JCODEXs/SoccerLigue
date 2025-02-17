@@ -17,10 +17,6 @@ export async function findMatch(id: string) {
       }
  
     },
-    
-   
-   
-
   });
 
   return match;
@@ -100,11 +96,11 @@ export async function saveMatchData({ matchData }: { matchData: MatchData }) {
       }));
 
       // Insert events into the database
-      await prisma.event.createMany({ data: formattedEvents });
+      await db.event.createMany({ data: formattedEvents });
     }
 
     // Update match with score
-   const updatedMatch = await prisma.match.update({
+   const updatedMatch = await db.match.update({
   where: {
     id: matchId,
   },
@@ -147,7 +143,7 @@ export async function getTeamsAndLocations() {
 }
 
 export async function fetchPlayersByTeam  (teamName: string) {
-  return await prisma.team.findUnique({
+  return await db.team.findUnique({
     where: { name: teamName },
     include: { players: true },
   });

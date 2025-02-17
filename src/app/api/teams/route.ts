@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma";
+import { db } from "@/server/db";
 import { NextResponse } from "next/server";
 
 interface TeamRequest {
@@ -15,7 +15,7 @@ interface PlayerRequest {
 
 export async function GET() {
   try {
-    const teams = await prisma.team.findMany({ include: { players: true } });
+    const teams = await db.team.findMany({ include: { players: true } });
     return NextResponse.json({ success: true, teams });
   } catch (error) {
     console.error("Error fetching teams:", error.stack || error);
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const newTeam = await prisma.team.create({
+    const newTeam = await db.team.create({
       data: {
         name,
         players: {
@@ -88,14 +88,14 @@ export async function DELETE(req: Request) {
 
     console.log("teamID",teamId)
     // Set players' teamId to null (keep players but dissociate them from the team)
-    await prisma.player.updateMany({
+    await db.player.updateMany({
       where: { teamId },
       data: { teamId: null }, // Disassociate players from the team
     });
     // Matches will continue to reference teams even if teams are deleted
 
   
-   const team= await prisma.team.delete({
+   const team= await db.team.delete({
       where: { id: teamId },
     });
 console.log(team)
@@ -118,7 +118,7 @@ export async function PATCH(req: Request) {
       );
     }
 
-    const newPlayer = await prisma.player.create({
+    const newPlayer = await db.player.create({
       data: { name, position, number, teamId },
     });
 

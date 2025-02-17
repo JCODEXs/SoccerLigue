@@ -1,3 +1,5 @@
+import { db } from "@/server/db";
+
 export async function PATCH(req: Request) {
   try {
     const { playerId, newTeamId } = await req.json();
@@ -7,7 +9,7 @@ export async function PATCH(req: Request) {
     }
 
     // Reassign the player to the new team
-    const updatedPlayer = await prisma.player.update({
+    const updatedPlayer = await db.player.update({
       where: { id: playerId },
       data: { teamId: newTeamId },
     });

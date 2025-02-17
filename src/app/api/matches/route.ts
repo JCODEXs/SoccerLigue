@@ -1,11 +1,9 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { db } from "@/server/db";
 
 // Handle GET request
 export async function GET(req: Request) {
   try {
-    const matches = await prisma.match.findMany({
+    const matches = await db.match.findMany({
       orderBy: { date: 'asc' },
       include: {
     homeTeam: {
@@ -34,7 +32,7 @@ export async function GET(req: Request) {
       { status: 500 }
     );
   } finally {
-    await prisma.$disconnect();
+    await db.$disconnect();
   }
 }
 
