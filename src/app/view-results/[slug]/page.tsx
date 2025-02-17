@@ -2,6 +2,22 @@
 import Scoreboard from "@/components/scoreBoard";
 import React, { use, useEffect, useState } from "react";
 import { findMatch } from "../../actions/actions";
+type MatchStats = {
+  shots: { homeTeam: number; awayTeam: number };
+  shotsOnTarget: { homeTeam: number; awayTeam: number };
+  corners: { homeTeam: number; awayTeam: number };
+  fouls: { homeTeam: number; awayTeam: number };
+  cards: { homeTeam: number; awayTeam: number };
+};
+
+type MatchData = {
+  Date: string;
+  homeTeam: string;
+  awayTeam: string;
+  scoreA: number;
+  scoreB: number;
+  stats: MatchStats;
+};
 
 const ViewResultsPage = ({
     params,
@@ -10,21 +26,20 @@ const ViewResultsPage = ({
 }) =>{
 const { slug } = use(params);
   console.log(slug)
-  const [matchSummary, setMatchSummary] = useState(null);
+  const [matchSummary, setMatchSummary] = useState<MatchData| null>(null);
 
   useEffect(() => {
     const fetchMatchData = async () => {
       try {
          if (!slug) return;
-        const matchData = await findMatch(slug);
+        const matchDataP = await findMatch(slug);
      
-if (!matchDataP) {
+  if (!matchDataP) {
   console.error("Match not found");
   return;
-}
-
-const { events: GameEvents } = matchDataP; // Now it's safe to destructure
-console.log("este", matchDataP);
+  }
+  const { events: GameEvents } = matchDataP; // Now it's safe to destructure
+    console.log("este", matchDataP);
         const generatedData = generateMatchData(GameEvents);
         setMatchSummary(generatedData);
       } catch (error) {
