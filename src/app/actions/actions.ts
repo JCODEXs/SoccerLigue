@@ -126,7 +126,7 @@ export async function saveMatchData({ matchData }: { matchData: MatchData }) {
   };
 
 }
-
+}
 
 export async function getTeamsAndLocations() {
   try {
