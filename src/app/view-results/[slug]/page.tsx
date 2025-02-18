@@ -36,14 +36,18 @@ console.log("hometeam",homeTeam)
       }
     };
 
-    fetchMatchData();
+    void fetchMatchData();
   }, [slug,homeTeam,awayTeam]);
 
   function generateMatchData(events: MatchEvent[]) {
     const matchData:MatchData = {
-      Date: "2025-02-28",
-      homeTeam: "",
-      awayTeam: "",
+      date: new Date("2025-02-28"),
+      time:"10:00",
+    Location:{name:"las condes",id:"245g"},
+    referee:"George",
+    locationId:"03909257",
+      homeTeam: {name:"colo-colo",id:"42463464546"},
+      awayTeam: {name:"U Chile",id:"424634645ers"},
       scoreA: 0,
       scoreB: 0,
       stats: {

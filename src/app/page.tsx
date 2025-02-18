@@ -1,11 +1,15 @@
 import Scoreboard from "@/components/scoreBoard";
-
+import type{ MatchData } from "@/lib/types";
 
 export default function HomePage() {
-   const matchData = {
-    Date: "2025-02-28",
-    homeTeam: "Team A",
-    awayTeam: "Team B",
+   const matchData:MatchData = {
+    date: new Date("2025-02-28"),
+    time:"10:00",
+    Location:{name:"las condes",id:"245g"},
+    referee:"George",
+    locationId:"03909257",
+    homeTeam: {name:"Team A",id:"346"},
+    awayTeam: {name:"Team B",id:"34666d"},
     scoreA: 2,
     scoreB: 1,
     stats: {
