@@ -7,7 +7,7 @@ import React from "react";
 
 // Scoreboard Component
 const Scoreboard: React.FC<{ matchData: MatchData }> = ({ matchData }) => {
-  const { homeTeam, awayTeam, scoreA, scoreB, stats,Date } = matchData;
+  const { homeTeam, awayTeam, scoreA, scoreB, stats,date } = matchData;
 console.log(matchData)
   return (
     
@@ -15,16 +15,16 @@ console.log(matchData)
       <div className="flex justify-between items-center ">
         <div className="md:text-2xl  font-bold text-center flex flex-row text-center bg-gradient-to-r from-teal-600 to-gray-800 rounded-tl-3xl rounded-br-3xl shadow-md ">
           <div className="text-3xl p-3 bg-gradient-to-r from-gray-800 to-teal-600 rounded-br-3xl rounded-tl-3xl ">{scoreA}</div>
-          <div className="align-center lg:text-2xl p-2  rounded-tl-3xl  md:mx-10 px-6 sm:text-base md:text-xl ">{homeTeam}</div>
+          <div className="align-center lg:text-2xl p-2  rounded-tl-3xl  md:mx-10 px-6 sm:text-base md:text-xl ">{homeTeam?.name}</div>
         </div>
           <div className="flex justify-center items-center bg-gray-800 p-3 m-1 bg-blend-multiply rounded-b-3xl">
   <div className="flex flex-col justify-center  text-center items-center rounded-2xl bg-blend-light text-white text-sm sm:text-base">
-    {formatDateToLetters(Date)}
+    {formatDateToLetters(date)}
   </div>
 </div>
 
         <div className="md:text-2xl  font-bold text-center flex flex-row text-center bg-gradient-to-l from-teal-600 to-gray-800 rounded-bl-3xl rounded-br-3xl shadow-md">
-          <div className=" align-center lg:text-2xl p-2  rounded-tr-3xl  md:mx-10 px-6 sm:text-base md:text-xl">{awayTeam}</div>
+          <div className=" align-center lg:text-2xl p-2  rounded-tr-3xl  md:mx-10 px-6 sm:text-base md:text-xl">{awayTeam?.name}</div>
           <div className="text-3xl p-3 bg-gradient-to-l from-gray-800 to-teal-600 rounded-br-3xl rounded-tl-3xl ">{scoreB}</div>
         </div>
       </div>
