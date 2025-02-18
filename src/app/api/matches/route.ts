@@ -9,16 +9,19 @@ export async function GET(req: Request) {
     homeTeam: {
       select: {
         name: true, // Include the name of the home team
+        id: true,
       },
     },
     awayTeam: {
       select: {
         name: true, // Include the name of the away team
+        id: true,
       },
     },
-    location: {
+    Location: {
       select: {
         name: true, // Include location name if needed
+        id:true,
       },
     },
     events:true

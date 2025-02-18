@@ -3,16 +3,7 @@
 import { formatDateToLetters } from "@/lib/utils";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
-interface Match {
-  id: number;
-  homeTeam: string;
-  awayTeam: string;
-  date: Date;
-  time: string;
-  location: string;
-  judge: string;
-}
+import type { Match } from "@/lib/types";
 
 const ScheduledMatches: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -34,9 +25,11 @@ console.log("match",data)
         setMatches(data);
         setFilteredMatches(data);
             // Extract unique teams from homeTeam and awayTeam
-      const teamList = [
-        ...new Set(data.flatMap((match) => [match.homeTeam.name, match.awayTeam.name])),
-      ];
+       const teamList = [
+        ...new Set(
+          data.flatMap((match) => [match?.homeTeam?.name, match?.awayTeam?.name])
+        ),
+      ].filter((team): team is string => !!team);
       console.log("teams",teamList)
       setTeams(teamList);
       } catch (error) {
@@ -44,7 +37,7 @@ console.log("match",data)
       }
     };
 
-    fetchMatches();
+   void  fetchMatches();
   }, []); // This effect runs only once when the component mounts
 
    const encodeMatchData = (match: Match) => {
@@ -63,8 +56,8 @@ console.log("match",data)
     if (teamFilter) {
       filtered = filtered.filter(
         (match) =>
-          match.homeTeam.name.toLowerCase().includes(teamFilter.toLowerCase()) ||
-          match.awayTeam.name.toLowerCase().includes(teamFilter.toLowerCase())
+          match?.homeTeam?.name.toLowerCase().includes(teamFilter.toLowerCase()) ??
+          match?.awayTeam?.name.toLowerCase().includes(teamFilter.toLowerCase())
       );
     }
 
@@ -120,7 +113,7 @@ console.log("match",data)
             
               <div className="flex flex-col justify-between items-center">
                 <div className="text-lg font-bold text-orange-400">
-                  {match.homeTeam.name} vs {match.awayTeam.name}
+                  {match?.homeTeam?.name} vs {match?.awayTeam?.name}
                 </div>
                 <div className="text-lg text-gray-300 px-2 pt-1">
                   {formatDateToLetters(match.date)} at {match.time}
@@ -130,11 +123,11 @@ console.log("match",data)
 
               <div className="text-sm text-gray-400 m-2">
                 {/* Location:  */}
-                {match.location.name}
+                {match?.Location.name}
               </div>
               <div className="text-sm text-gray-400 mt-2 px-6">
                 Referee: {""}
-                {match?.judge}
+                {match?.referee}
               </div>
             </div>
               </Link>

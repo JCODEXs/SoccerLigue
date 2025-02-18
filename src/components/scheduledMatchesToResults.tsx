@@ -3,28 +3,17 @@
 import { formatDateToLetters } from "@/lib/utils";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFutbol } from "@fortawesome/free-solid-svg-icons";
+import type { Match,} from "@/lib/types";
 
-interface Match {
-  id: number;
-  homeTeam: string;
-  awayTeam: string;
-  date: Date;
-  time: string;
-  location: string;
-  judge: string;
-  events:[]
-}
 
 const ScheduledMatchesToResults: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [teamFilter, setTeamFilter] = useState<string>("");
   const [dateFilter, setDateFilter] = useState<string>("");
-   const [teams, setTeams] = useState<string[]>([]);
+   const [teams, setTeams] = useState<string[]>([""]);
 
   // Obtener los partidos programados desde la base de datos
     useEffect(() => {
@@ -40,16 +29,18 @@ console.log("match",data)
         setFilteredMatches(data);
             // Extract unique teams from homeTeam and awayTeam
       const teamList = [
-        ...new Set(data.flatMap((match) => [match.homeTeam.name, match.awayTeam.name])),
+        ...new Set(data.flatMap((match) => [match?.homeTeam?.name??"", match?.awayTeam?.name??""])),
       ];
       console.log("teams",teamList)
+      if(teamList){
       setTeams(teamList);
+      }
       } catch (error) {
         console.error("Error fetching matches:", error);
       }
     };
 
-    fetchMatches();
+   void fetchMatches();
   }, []); // This effect runs only once when the component mounts
 
    const encodeMatchData = (match: Match) => {
@@ -68,8 +59,8 @@ console.log("match",data)
     if (teamFilter) {
       filtered = filtered.filter(
         (match) =>
-          match.homeTeam.name.toLowerCase().includes(teamFilter.toLowerCase()) ||
-          match.awayTeam.name.toLowerCase().includes(teamFilter.toLowerCase())
+          match?.homeTeam?.name.toLowerCase().includes(teamFilter.toLowerCase()) ??
+          match?.awayTeam?.name.toLowerCase().includes(teamFilter.toLowerCase())
       );
     }
 
@@ -125,18 +116,18 @@ console.log("match",data)
             
               <div className="flex flex-col justify-between items-center">
                 <div className="text-lg font-bold text-orange-400  ">
-                {match?.events&&<FontAwesomeIcon icon={faFutbol} size="1x" color="white" />}  {match.homeTeam.name} vs {match.awayTeam.name} 
+                {match?.events&&<FontAwesomeIcon icon={faFutbol} size="1x" color="white" />}  {match?.homeTeam?.name} vs {match?.awayTeam?.name} 
                 </div>
                 <div className="text-md gap-2 flex text-gray-300 flex-col sm:flex-row">
                   {formatDateToLetters(match.date)} at {match.time}
               <div className="flex justify-between gap-2 items-center md:flex-row">
               <div className="text-sm text-gray-300 ">
                 {/* Location:  */}
-                {match.location.name}
+                {match?.Location?.name}
               </div>
               <div className="text-sm text-gray-300  ">
                 Referee: {""}
-                {match?.judge}
+                {match?.referee}
               </div>
                 </div>
               </div>

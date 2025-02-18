@@ -2,7 +2,7 @@
 import { findMatch } from "@/app/actions/actions";
 import Details from "@/components/Details";
 import FillResults from "@/components/fillResults";
-import { useSearchParams } from "next/navigation";
+import type { Match } from "@/lib/types";
 import { use, useEffect, useState } from "react";
 
 
@@ -11,7 +11,7 @@ const  MatchDetails= ({ params,
   params: Promise<{ slug: string }>
 }) =>{
   
-   const [match, setMatch] = useState(null);
+  const [match, setMatch] = useState<Match |null >(null);
   const [isEditable, setIsEditable] = useState(false);
   const [isReadyForResults, setIsReadyForResults] = useState(false);
   const [isResultsAvailable, setIsResultsAvailable] = useState(false);
@@ -24,18 +24,19 @@ const { slug } = use(params);
     const fetchMatchData = async () => {
       try {
          if (!slug) return;
-        const matchDataP = await findMatch(slug);
-        const { events: GameEvents } = matchDataP;
+        const matchDataP:Match|null = await findMatch(slug);
         console.log("este",matchDataP)
-        
-        setMatch(matchDataP);
+        if (!matchDataP){
+          return;
+        }
+          setMatch(matchDataP);
       } catch (error) {
         console.error("Error fetching match data:", error);
       }
     };
 
-    fetchMatchData();
-  }, []);
+    void fetchMatchData();
+  }, [slug]);
   useEffect(() => {
     if (match) {
       try {
@@ -69,15 +70,15 @@ const { slug } = use(params);
   }, [match]);
 
 // If the match is editable, show the Details component
-  if (isEditable) {
-    return 
+  if (isEditable&&match) {
+    return (
      <div className="pb-2">
        <Details match={match} />;
-      </div>
+      </div>)
   }
 
   // If the match has ended and results are not available, show the FillResults component
-  if (isReadyForResults ) {
+  if (isReadyForResults&& match ) {
     return (
       <div className="pb-2">
       <FillResults match={match} />;
@@ -90,7 +91,7 @@ const { slug } = use(params);
     return (
       <div>
         <p className="text-green-500">Results are available. View the scoreboard:</p>
-        <a href={`/matchesDetails/${match.id}/results`} className="text-blue-700 underline">View Results</a>
+        <a href={`/matchesDetails/${match?.id}/results`} className="text-blue-700 underline">View Results</a>
       </div>
     );
   }

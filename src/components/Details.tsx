@@ -2,19 +2,10 @@
 
 import React from "react";
 import { useEffect, useState } from "react";
+import type { Match } from "@/lib/types";
 
-interface Match {
-  id: number;
-  homeTeam: string;
-  awayTeam: string;
-  date: string; // Asegúrate de que la fecha sea una cadena en formato ISO
-  time: string;
-  location: string;
-  judge?: string;
-  createdAt?: string;
-}
 interface DetailsProps {
-  match: Match; // Define the match prop type
+  match: Match; 
 }
 const Locations = [
   "Location A",
@@ -23,21 +14,21 @@ const Locations = [
   "Location D",
   "Location E",
 ];
-const judges = [
-  "judge A",
-  "judge B",
-  "judge C",
-  "judge D",
-  "judge E",
+const Referees = [
+  "Referee A",
+  "Referee B",
+  "Referee C",
+  "Referee D",
+  "Referee E",
 ];
 
 export default function Details({match}:DetailsProps){
  
   
  const [location, setLocation] = useState<string>("");
-  const [judge, setJudge] = useState<string>("");
+  const [referee,setReferee] = useState<string|null>(match?.referee);
   const [isEditable, setIsEditable] = useState<boolean>(false);
-    const [date, setDate] = useState<Date | undefined>(new Date());
+    const [date, setDate] = useState<Date >(new Date());
   const [time, setTime] = useState<string>("10:50");
   /// crear inputs para hora y fecha
 
@@ -46,14 +37,12 @@ export default function Details({match}:DetailsProps){
   // Manejar el envío del formulario de edición
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!match) return;
-
     // Aquí puedes agregar la lógica para guardar los cambios en la base de datos
     const updatedMatch = {
       ...match,
       location: location,
-      judge: judge,
+      referee: referee,
     };
 
     console.log("Updated Match:", updatedMatch);
@@ -72,7 +61,7 @@ console.log("Is editable:", isEditable);
     <div className="p-6 bg-gray-800 text-white rounded-lg shadow-lg m-6">
      <div className="flex flex-col justify-around gap-6 p-2 bg-gray-100 rounded-lg shadow-md">
       <h1 className=" flex justify-around text-3xl font-bold mb-4 text-gray-700">
-        {match?.homeTeam.name} vs {match?.awayTeam.name}
+        {match?.homeTeam?.name} vs {match?.awayTeam?.name}
       <p className="text-lg mb-2">
 {new Date(match?.date).toLocaleDateString()} at {match?.time}
       </p>
@@ -80,10 +69,10 @@ console.log("Is editable:", isEditable);
      <div className="flex flex-row justify-around gap-6 p-2 bg-gray-100 rounded-lg shadow-md">
 
   <p className="text-lg text-gray-700">
-    <span className="font-bold text-primary">Location:</span> {match?.location.name}
+    <span className="font-bold text-primary">Location:</span> {match?.Location?.name}
   </p>
   <p className="text-lg text-gray-700">
-    <span className="font-bold text-primary">Referee:</span> {match?.judge || "Not assigned"}
+    <span className="font-bold text-primary">Referee:</span> {match?.referee ?? "Not assigned"}
   </p>
 </div>
 </div>
@@ -99,9 +88,9 @@ console.log("Is editable:", isEditable);
               </label>
               <select 
               onChange={(e)=>setLocation(e.target.value)}
-              value={match?.location}
+              value={match?.Location.name}
               className=" p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400">
-                <option value={match?.location}>{match?.location}</option>
+                <option value={match?.Location.name}>{match?.Location.name}</option>
                 {Locations.map((location)=>
                 <option key={location} value={location}>{location}</option>)}
               </select>
@@ -113,21 +102,21 @@ console.log("Is editable:", isEditable);
               /> */}
             </div>
             <div>
-              <label htmlFor="judge" className="block text-lg mb-1">
+              <label htmlFor="Referee" className="block text-lg mb-1">
                 Referee
               </label>
               <select 
-              onChange={(e)=>setJudge(e.target.value)}
-              value={match?.judge} className=" p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400">
-                <option value={match?.judge}>{match?.judge || "Not assigned"}</option>
-                {judges.map((judge)=>
-                <option key={judge} value={judge}>{judge}</option>)}
+              onChange={(e)=>setReferee(e.target.value)}
+              value={match?.referee??""} className=" p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400">
+                <option value={match?.referee??""}>{match?.referee ?? "Not assigned"}</option>
+                {Referees.map((referee)=>
+                <option key={referee} value={referee}>{referee}</option>)}
 
               </select>
               {/* <input
                 type="text"
-                id="judge"
-                defaultValue={match?.judge || ""}
+                id="referee"
+                defaultValue={match?.referee || ""}
                 className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400"
               /> */}
             </div>

@@ -18,6 +18,15 @@ export type TeamStats = {
  homeTeam:stats
  awayTeam:stats
 };
+export type Event= {
+  type: string;
+  team: string;
+  player: string;
+  assistant?: string;
+  card?:string;
+  substitute?:string;
+  timestamp: string;
+}
 export type MatchEvent = {
   team: string |null;
   type: string;
@@ -29,39 +38,37 @@ export type MatchEvent = {
   timestamp: string;
   matchId: string | null;
 };
+export type Team={
+  id:string;
+    name:string
+}
 
 export type Match = {
   id: string;
-  homeTeam: string;
-  awayTeam: string;
-  homeTeamScore: number;
-  awayTeamScore: number;
-  homeTeamShots: number;
-  awayTeamShots: number;
-  homeTeamShotsOnTarget: number;
-  awayTeamShotsOnTarget: number;
-  homeTeamCorners: number;
-  awayTeamCorners: number;
-  homeTeamFouls: number;
-  awayTeamFouls: number;
-  homeTeamCards: number;
-  awayTeamCards: number;
-  homeTeamYellowCards: number;
-  awayTeamYellowCards: number;
-  homeTeamRedCards: number;
-  awayTeamRedCards: number;
-  homeTeamSubstitutions: number;
-  awayTeamSubstitutions: number;
-  homeTeamGoals: number;
-  awayTeamGoals: number;
-  homeTeamAssists: number;
-  awayTeamAssists: number;}
-  
+  homeTeamId: string | null;
+  awayTeamId: string | null;
+  locationId: string;
+  date: Date;
+  time: string;
+  referee: string|null;
+  events: MatchEvent[];
+  homeTeam: Team | null;
+  awayTeam: Team | null;
+  createdAt: Date;
+  updatedAt: Date;
+  Location:Team;
+
+};
+
 
 export type MatchData = {
-  Date: string;
-  homeTeam: string|null;
-  awayTeam: string|null;
+  date: Date;
+  time: string;
+  Location:Team;
+  referee:string;
+  homeTeam: Team|null;
+  awayTeam: Team|null;
+  locationId: string;
   scoreA: number;
   scoreB: number;
   stats: MatchStats;
@@ -72,15 +79,6 @@ export type SavedMatchData = {
 homeTeam:string,
 awayTeam:string,
 };
-export type Event= {
-  type: string;
-  team: string;
-  player: string;
-  assistant?: string;
-  card?:string;
-  substitute?:string;
-  timestamp: string;
-}
 export type Player = {
   id: string;
   name: string;
@@ -90,4 +88,7 @@ export type Player = {
   createdAt: Date;
 };
 
-type PlayersList = Player[];
+export type Location ={
+  id:string;
+  name:string;
+}

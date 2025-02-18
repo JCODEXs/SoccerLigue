@@ -1,21 +1,28 @@
 "use server";
 
+import type { Match } from "@/lib/types";
 import { db } from "@/server/db";
 
+
 export async function findMatch(id: string) {
-  const match = await db.match.findUnique({
+  const match:Match|null = await db.match.findUnique({
     where: {
       id: id,
     },
     include: {
       events: true, // 
       homeTeam:{
-        select: {name:true}
+        select: {name:true,
+          id:true
+        }
       },
       awayTeam:{
-        select: {name:true}
-      }
- 
+        select: {name:true
+        ,id:true,
+        }
+      },
+      Location:true,
+      
     },
   });
 
@@ -27,8 +34,8 @@ export async function saveMatchToDatabase(match: {
   awayTeamId: string;
   locationId: string;
   date: Date;
+  referee: string;
   time: string;
-  judge: string;
 }) {
   try {
     const newMatch = await db.match.create({
@@ -38,7 +45,7 @@ export async function saveMatchToDatabase(match: {
         locationId: match.locationId,
         date: match.date,
         time: match.time,
-        judge: match.judge,
+        referee: match.referee,
       },
     });
 
@@ -88,9 +95,9 @@ export async function saveMatchData({ matchData }: { matchData: MatchData }) {
         type: event.type,
         team: event.team,
         player: event.player,
-        assistant: event.assistant || null,
-        substitute: event.substitute || null,
-        card: event.card || null,
+        assistant: event.assistant ?? null,
+        substitute: event.substitute ?? null,
+        card: event.card ?? null,
         timestamp: event.timestamp,
         matchId, // Link event to match
       }));
@@ -100,23 +107,23 @@ export async function saveMatchData({ matchData }: { matchData: MatchData }) {
     }
 
     // Update match with score
-   const updatedMatch = await db.match.update({
-  where: {
-    id: matchId,
-  },
-  data: {
-    score: {
-      upsert: {
-        create: { homeScore: homeScore, awayScore: awayScore }, 
-       update: { homeScore: homeScore, awayScore: awayScore },
-      },
-    },
-  },
-});
+//    const updatedMatch = await db.match.update({
+//   where: {
+//     id: matchId,
+//   },
+//   data: {
+//     score: {
+//       upsert: {
+//         create: { homeScore: homeScore, awayScore: awayScore }, 
+//        update: { homeScore: homeScore, awayScore: awayScore },
+//       },
+//     },
+//   },
+// });
 
 
-    console.log("Match and events saved successfully!");
-    return { success: true, match: updatedMatch };
+//     console.log("Match and events saved successfully!");
+//     return { success: true, match: updatedMatch };
 
   }  catch (error) {
   console.error("Error saving match data:", error);
@@ -125,7 +132,7 @@ export async function saveMatchData({ matchData }: { matchData: MatchData }) {
     message: (error as Error).message || "Internal server error" 
   };
 
-}
+ }
 }
 
 export async function getTeamsAndLocations() {

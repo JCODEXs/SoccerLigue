@@ -18,7 +18,7 @@ export async function GET() {
     const teams = await db.team.findMany({ include: { players: true } });
     return NextResponse.json({ success: true, teams });
   } catch (error) {
-    console.error("Error fetching teams:", (error as Error).stack || error);
+    console.error("Error fetching teams:", (error as Error).stack ?? error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch teams. Please try again later." },
       { status: 500 }
@@ -69,18 +69,21 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, team: newTeam }, { status: 201 });
   } catch (error) {
-    console.error("Error creating team:", (error as Error).stack || error);
+    console.error("Error creating team:", (error as Error).stack ?? error);
     return NextResponse.json(
       { success: false, message: "Failed to create team. Please try again later." },
       { status: 500 }
     );
   }
 }
-
+interface DeleteTeamRequest {
+  teamId: string;
+}
 export async function DELETE(req: Request) {
   try {
-    const body = await req.json();
-    const { teamId } = body;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const body:DeleteTeamRequest = await req.json();
+    const { teamId }: { teamId?: string } = body;
 
     if (!teamId) {
       return NextResponse.json({ success: false, message: "No team ID provided" }, { status: 400 });
@@ -124,7 +127,7 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({ success: true, player: newPlayer }, { status: 201 });
   } catch (error) {
-    console.error("Error adding player:", (error as Error).stack || error);
+    console.error("Error adding player:", (error as Error).stack ?? error);
     return NextResponse.json(
       { success: false, message: "Failed to add player. Please try again later." },
       { status: 500 }

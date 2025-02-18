@@ -38,15 +38,6 @@ CREATE TABLE "Event" (
 );
 
 -- CreateTable
-CREATE TABLE "Score" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "homeScore" INTEGER NOT NULL,
-    "awayScore" INTEGER NOT NULL,
-    "matchId" TEXT NOT NULL,
-    CONSTRAINT "Score_matchId_fkey" FOREIGN KEY ("matchId") REFERENCES "Match" ("id") ON DELETE CASCADE ON UPDATE CASCADE
-);
-
--- CreateTable
 CREATE TABLE "Match" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "homeTeamId" TEXT,
@@ -54,7 +45,7 @@ CREATE TABLE "Match" (
     "locationId" TEXT NOT NULL,
     "date" DATETIME NOT NULL,
     "time" TEXT NOT NULL,
-    "judge" TEXT NOT NULL,
+    "referee" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "Match_homeTeamId_fkey" FOREIGN KEY ("homeTeamId") REFERENCES "Team" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
@@ -120,9 +111,6 @@ CREATE UNIQUE INDEX "Location_name_key" ON "Location"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Team_name_key" ON "Team"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Score_matchId_key" ON "Score"("matchId");
 
 -- CreateIndex
 CREATE INDEX "Post_name_idx" ON "Post"("name");

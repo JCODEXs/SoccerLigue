@@ -1,13 +1,7 @@
 import { create } from "zustand";
 
 // Tipo para el partido
-interface Match {
-  homeTeam: string;
-  awayTeam: string;
-  date: Date;
-  time: string;
-  location: string;
-}
+import type { Match } from "@/lib/types";
 
 // Store de Zustand
 interface MatchStore {

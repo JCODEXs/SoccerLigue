@@ -1,27 +1,13 @@
 
 import { fetchPlayersByTeam, saveMatchData } from "@/app/actions/actions";
 import React, { useEffect, useState } from "react";
-import type { Event, MatchData, Player, SavedMatchData } from "@/lib/types";
-
-
-interface Match {
-  id: string;
-  homeTeamId: string;
-  awayTeamId: string;
-  date: Date;
-  time: string;
-  locationId: string;
-  judge: string;
-  homeTeam: { name: string };
-  awayTeam: { name: string };
-}
-
+import type { Event, Player, SavedMatchData, Match } from "@/lib/types";
 
 
 const FillResults: React.FC<{ match: Match }> = ({ match }) => {
   console.log(match)
   const { homeTeamId, awayTeamId, homeTeam, awayTeam,id,date,locationId } = match;
-  const [selectedTeam, setSelectedTeam] = useState<string>(homeTeam?.name);
+  const [selectedTeam, setSelectedTeam] = useState<string>("");
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [card, setCard] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<string>("goal");
@@ -71,8 +57,8 @@ const handleSave = async () => {
 
 
   const getPlayersData = async () => {
-    const playersa = await fetchPlayersByTeam(homeTeam.name);
-    const playersb = await fetchPlayersByTeam(awayTeam.name);
+    const playersa = homeTeam&&await fetchPlayersByTeam(homeTeam?.name);
+    const playersb =awayTeam&& await fetchPlayersByTeam(awayTeam.name);
 if(playersa && playersb){
 
   setAvailablePlayersA(playersa.players.slice(0,11)); // Initialize available players for Team A
@@ -86,7 +72,7 @@ if(playersa && playersb){
   
 
   useEffect(() => {
-    getPlayersData();
+    void getPlayersData();
   }, []);
   useEffect(() => {
     if (selectedEvent != "goal" && selectedEvent!="penalty") {
@@ -142,7 +128,7 @@ const updateAvailablePlayers = (event: Event) => {
   console.log("SubplayersA", substitutePlayersA);
   console.log("SubplayersB", substitutePlayersB);
 
-  if (team === homeTeam.name) {
+  if (team === homeTeam?.name) {
     let updatedPlayersA = [...availablePlayersA];
 
     if (type === "faul" && card === "Red Card") {
@@ -172,7 +158,7 @@ const updateAvailablePlayers = (event: Event) => {
 
     // Update the available players list for Team A
     setAvailablePlayersA(updatedPlayersA);
-  } else if (team === awayTeam.name) {
+  } else if (team === awayTeam?.name) {
     let updatedPlayersB = [...availablePlayersB];
 
     if (type === "faul" && card === "Red Card") {
@@ -230,8 +216,8 @@ const updateAvailablePlayers = (event: Event) => {
               setSelectedPlayer(null); // Reset player when team changes
             }}
           >
-            <option value={`${homeTeam.name}`}>{homeTeam.name}</option>
-            <option value={`${awayTeam.name}`}>{awayTeam.name}</option>
+            <option value={`${homeTeam?.name}`}>{homeTeam?.name}</option>
+            <option value={`${awayTeam?.name}`}>{awayTeam?.name}</option>
           </select>
         </div>
          {/* Event Type Selection */}
@@ -261,8 +247,8 @@ const updateAvailablePlayers = (event: Event) => {
             onChange={(e) => setSelectedPlayer(e.target.value)}
           >
             <option value="" disabled>Select a player</option>
-            {(Array.isArray(selectedTeam === homeTeam.name ? availablePlayersA : availablePlayersB)
-              ? selectedTeam === homeTeam.name
+            {(Array.isArray(selectedTeam === homeTeam?.name ? availablePlayersA : availablePlayersB)
+              ? selectedTeam === homeTeam?.name
               ? availablePlayersA
               : availablePlayersB
               : []
@@ -284,8 +270,8 @@ const updateAvailablePlayers = (event: Event) => {
                onChange={(e) => setGoalAssistant(e.target.value)}
              >
                <option value="">No Assist</option>
-               {(Array.isArray(selectedTeam === homeTeam.name ? availablePlayersA : availablePlayersB)
-         ? selectedTeam === homeTeam.name
+               {(Array.isArray(selectedTeam === homeTeam?.name ? availablePlayersA : availablePlayersB)
+         ? selectedTeam === homeTeam?.name
            ?  availablePlayersA.filter((player) => player.name !== selectedPlayer)
                     : availablePlayersB.filter((player) => player.name !== selectedPlayer)
          : []
@@ -337,8 +323,8 @@ const updateAvailablePlayers = (event: Event) => {
                 onChange={(e) => setGoalScorer(e.target.value)}
               >
                 <option value="" disabled>Select a goal scorer</option>
-                {(Array.isArray(selectedTeam === homeTeam.name ? availablePlayersA : availablePlayersB)
-                  ? selectedTeam === homeTeam.name
+                {(Array.isArray(selectedTeam === homeTeam?.name ? availablePlayersA : availablePlayersB)
+                  ? selectedTeam === homeTeam?.name
                     ? availablePlayersA
                     : availablePlayersB
                   : []
@@ -358,8 +344,8 @@ const updateAvailablePlayers = (event: Event) => {
               >
       
                 <option value="">No Assist</option>
-                {(Array.isArray(selectedTeam === homeTeam.name ? availablePlayersA : availablePlayersB)
-                    ? selectedTeam === homeTeam.name
+                {(Array.isArray(selectedTeam === homeTeam?.name ? availablePlayersA : availablePlayersB)
+                    ? selectedTeam === homeTeam?.name
                     ?  availablePlayersA.filter((player) => player.name !== goalScorer)
                     : availablePlayersB.filter((player) => player.name !== goalScorer)
                   : []
@@ -382,8 +368,8 @@ const updateAvailablePlayers = (event: Event) => {
                 onChange={(e) => setGoalScorer(e.target.value)}
               >
                 <option value="" disabled>Select a goal scorer</option>
-                {(Array.isArray(selectedTeam === homeTeam.name ? availablePlayersA : availablePlayersB)
-                  ? selectedTeam === homeTeam.name
+                {(Array.isArray(selectedTeam === homeTeam?.name ? availablePlayersA : availablePlayersB)
+                  ? selectedTeam === homeTeam?.name
                   ? availablePlayersB
                   : availablePlayersA
                   : []
@@ -407,8 +393,8 @@ const updateAvailablePlayers = (event: Event) => {
     onChange={(e) => setSubstitutePlayer(e.target.value)}
   >
     <option value="" disabled>Select a substitute</option>
-    {(Array.isArray(selectedTeam === homeTeam.name ? substitutePlayersA : substitutePlayersB)
-                  ? selectedTeam === homeTeam.name
+    {(Array.isArray(selectedTeam === homeTeam?.name ? substitutePlayersA : substitutePlayersB)
+                  ? selectedTeam === homeTeam?.name
                   ? substitutePlayersA
                   : substitutePlayersB
                   : []
