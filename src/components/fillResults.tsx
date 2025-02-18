@@ -1,24 +1,11 @@
 
 import { fetchPlayersByTeam, saveMatchData } from "@/app/actions/actions";
 import React, { useEffect, useState } from "react";
+import type { Event, MatchData, Player, SavedMatchData } from "@/lib/types";
 
-interface MatchData {
-  Date: string;
-  homeTeam: string;
-  awayTeam: string;
-  scoreA: number;
-  scoreB: number;
-  stats: {
-    shots: { homeTeam: number; awayTeam: number };
-    shotsOnTarget: { homeTeam: number; awayTeam: number };
-    corners: { homeTeam: number; awayTeam: number };
-    fouls: { homeTeam: number; awayTeam: number };
-    cards: { homeTeam: number; awayTeam: number };
-  };
-}
 
 interface Match {
-  id: number;
+  id: string;
   homeTeamId: string;
   awayTeamId: string;
   date: Date;
@@ -29,15 +16,7 @@ interface Match {
   awayTeam: { name: string };
 }
 
-interface Event {
-  type: string;
-  team: string;
-  player: string;
-  assistant?: string;
-  card?:string;
-  substitute?:string;
-  timestamp: string;
-}
+
 
 const FillResults: React.FC<{ match: Match }> = ({ match }) => {
   console.log(match)
@@ -50,28 +29,43 @@ const FillResults: React.FC<{ match: Match }> = ({ match }) => {
   // const [playersA, setPlayersA] = useState<[]>([]);
   // const [playersB, setPlayersB] = useState<[]>([]);
   const [isGoalFromEvent, setIsGoalFromEvent] = useState<boolean>(false); 
-  const [goalScorer, setGoalScorer] = useState<string | null>(null); // 
-  const [goalAssistant, setGoalAssistant] = useState<string | null>(null);
-  const [availablePlayersA, setAvailablePlayersA] = useState<[]>([]); 
-  const [availablePlayersB, setAvailablePlayersB] = useState<[]>([]); 
-  const [substitutePlayersA, setSubstitutePlayersA] = useState<[]>([]); 
-  const [substitutePlayersB, setSubstitutePlayersB] = useState<[]>([]); 
+  const [goalScorer, setGoalScorer] = useState<string >(""); // 
+  const [goalAssistant, setGoalAssistant] = useState<string| null >(null);
+  const [availablePlayersA, setAvailablePlayersA] = useState<Player[]>([]); 
+  const [availablePlayersB, setAvailablePlayersB] = useState<Player[]|[]>([]); 
+  const [substitutePlayersA, setSubstitutePlayersA] = useState<Player[]|[]>([]); 
+  const [substitutePlayersB, setSubstitutePlayersB] = useState<Player[]|[]>([]); 
   const [substitutePlayer, setSubstitutePlayer] = useState<string | null>(null); 
 
   // custom functions
-  const handleSave = async () => {
-  const matchData = {
-    events,
-    matchId: id,
-    homeTeam:homeTeam.name,
-    awayTeam:awayTeam.name,
-  };
-console.log("dataindetails",matchData)
-  const response = await saveMatchData({matchData});
-  if (response.success) {
-    alert("Match saved successfully!");
-  } else {
-    alert("Error saving match: " + response.error);
+const handleSave = async () => {
+  try {
+    if (!id || !homeTeam?.name || !awayTeam?.name || !events?.length) {
+      console.error("Missing required match data", { id, homeTeam, awayTeam, events });
+      alert("Error: Missing required match data.");
+      return;
+    }
+
+    const matchData: SavedMatchData = {
+      events,
+      matchId: id,
+      homeTeam: homeTeam.name,
+      awayTeam: awayTeam.name,
+    };
+
+    console.log("Saving match data:", matchData);
+
+    const response = await saveMatchData({ matchData });
+
+    if (response?.success) {
+      alert("Match saved successfully!");
+    } else {
+      console.error("Error saving match:", response);
+      alert(`Error saving match: ${response?.message ?? "Unknown error"}`);
+    }
+  } catch (error) {
+    console.error("Unexpected error saving match:", error);
+    alert("An unexpected error occurred while saving the match.");
   }
 };
 
@@ -79,12 +73,13 @@ console.log("dataindetails",matchData)
   const getPlayersData = async () => {
     const playersa = await fetchPlayersByTeam(homeTeam.name);
     const playersb = await fetchPlayersByTeam(awayTeam.name);
-    // setPlayersA(playersa.players);
-    // setPlayersB(playersb.players);
-    setAvailablePlayersA(playersa.players.slice(0,11)); // Initialize available players for Team A
-    setAvailablePlayersB(playersb.players.slice(0,11)); // Initialize available players for Team B
-    setSubstitutePlayersA(playersa.players.slice(11))
-    setSubstitutePlayersB(playersb.players.slice(11))
+if(playersa && playersb){
+
+  setAvailablePlayersA(playersa.players.slice(0,11)); // Initialize available players for Team A
+  setAvailablePlayersB(playersb.players.slice(0,11)); // Initialize available players for Team B
+  setSubstitutePlayersA(playersa.players.slice(11))
+  setSubstitutePlayersB(playersb.players.slice(11))
+}
     console.log("Home Team Players:", playersa?.players);
     console.log("Away Team Players:", playersb?.players);
   };
@@ -96,7 +91,7 @@ console.log("dataindetails",matchData)
   useEffect(() => {
     if (selectedEvent != "goal" && selectedEvent!="penalty") {
   setGoalAssistant(selectedPlayer);}
-}, [selectedPlayer]); 
+}, [selectedPlayer,selectedEvent]); 
 
 
   const handleAddEvent = () => {
@@ -109,9 +104,9 @@ console.log("dataindetails",matchData)
       type: selectedEvent,
       team: selectedTeam,
       player: selectedPlayer,
-      assistant: goalAssistant || undefined,
+      assistant: goalAssistant ??undefined,
       card: card ?? undefined,
-      substitute:substitutePlayer || undefined,
+      substitute:substitutePlayer ??undefined,
       timestamp,
     };
 
@@ -121,7 +116,7 @@ console.log("dataindetails",matchData)
         type: "goal",
         team: selectedTeam,
         player: goalScorer,
-        assistant: goalAssistant || undefined,
+        assistant: goalAssistant ?? undefined,
         timestamp,
       };
       console.log("events",newEvent,goalEvent)
@@ -132,12 +127,12 @@ console.log("dataindetails",matchData)
 updateAvailablePlayers(newEvent);
     // Reset states
     setIsGoalFromEvent(false);
-    setGoalScorer(null);
+    setGoalScorer("");
     // setCard(null);
     // setSelectedEvent("");
     // setSelectedTeam("");
     setSelectedPlayer(null);
-    setGoalAssistant(null);
+    setGoalAssistant("");
   };
 const updateAvailablePlayers = (event: Event) => {
   const { type, player, team, card, substitute } = event;
@@ -262,7 +257,7 @@ const updateAvailablePlayers = (event: Event) => {
           <label className="block font-semibold">Select Player</label>
           <select
             className="border p-2 rounded w-full bg-gray-600 border-teal-800"
-            value={selectedPlayer || ""}
+            value={selectedPlayer ?? ""}
             onChange={(e) => setSelectedPlayer(e.target.value)}
           >
             <option value="" disabled>Select a player</option>
@@ -285,7 +280,7 @@ const updateAvailablePlayers = (event: Event) => {
              <label className="block font-semibold">Assist Player (optional)</label>
              <select
                className="border p-2 rounded w-full bg-gray-600 border-teal-800"
-               value={goalAssistant || ""}
+               value={goalAssistant ?? ""}
                onChange={(e) => setGoalAssistant(e.target.value)}
              >
                <option value="">No Assist</option>
@@ -308,7 +303,7 @@ const updateAvailablePlayers = (event: Event) => {
              <label className="block font-semibold">Card</label>
              <select
                className="border p-2 rounded w-full bg-gray-600 border-teal-800"
-               value={card || ""}
+               value={card ?? ""}
                onChange={(e) => setCard(e.target.value)}
              >
                <option value="">No Card</option>
@@ -358,7 +353,7 @@ const updateAvailablePlayers = (event: Event) => {
               <label className="block font-semibold">Assist Player (optional)</label>
               <select
                 className="border p-2 rounded w-full bg-gray-600 border-teal-800"
-                value={goalAssistant || selectedPlayer}
+                value={goalAssistant ?? selectedPlayer??""}
                 onChange={(e) => setGoalAssistant(e.target.value)}
               >
       
@@ -408,7 +403,7 @@ const updateAvailablePlayers = (event: Event) => {
   <label className="block font-semibold">Select Substitute</label>
   <select
     className="border p-2 rounded w-full bg-gray-600 border-teal-800"
-    value={substitutePlayer || ""}
+    value={substitutePlayer ?? ""}
     onChange={(e) => setSubstitutePlayer(e.target.value)}
   >
     <option value="" disabled>Select a substitute</option>
@@ -437,7 +432,7 @@ const updateAvailablePlayers = (event: Event) => {
         
         {/* Events List */}
         <div className="mt-3   rounded-lg shadow-lg  w-full">
-          <h3 className="text-xl font-bold text-teal-900 text-center">Match Events</h3>
+          <h3 className="text-xl font-bold text-teal-900 text-center bg-orange-300">Match Events</h3>
           {events.length === 0 ? (
             <p className="text-gray-400 italic mt-2">No events added yet.</p>
           ) : (

@@ -1,21 +1,9 @@
+import type { MatchData } from "@/lib/types";
 import { formatDateToLetters } from "@/lib/utils";
 import React from "react";
 
 // Define the type for the match data
-interface MatchData {
-  Date: string;
-  homeTeam: string;
-  awayTeam: string;
-  scoreA: number;
-  scoreB: number;
-  stats: {
-    shots: { homeTeam: number; awayTeam: number };
-    shotsOnTarget: { homeTeam: number; awayTeam: number };
-    corners: { homeTeam: number; awayTeam: number };
-    fouls: { homeTeam: number; awayTeam: number };
-    cards: { homeTeam: number; awayTeam: number };
-  };
-}
+
 
 // Scoreboard Component
 const Scoreboard: React.FC<{ matchData: MatchData }> = ({ matchData }) => {
@@ -43,7 +31,7 @@ console.log(matchData)
 <div className="bg-gray-800 text-white  rounded-b-xl shadow-lg  m-1 sm:m-3">
       {/* Statistics */}
       <div className="space-y-2 ">
-          <div className="flex items-center justify-center  h-10 bg-gradient-to-l from-teal-200 to-teal-800 rounded-tr-lg p-2  bg-gradient-to-t from-teal-400 to-teal-800 rounded-tl-xl p-2 text-xl bg-gradient-to-l from-orange-800 to-orange-500">
+          <div className="flex items-center justify-center  h-10 bg-gradient-to-l from-teal-200 to-teal-800 rounded-tr-lg p-2 bg-orange-300 bg-gradient-to-t from-teal-400 to-teal-800 rounded-tl-xl p-2 text-xl bg-gradient-to-l from-orange-800 to-orange-500">
           Match stats
           </div>
         {/* Shots */}
