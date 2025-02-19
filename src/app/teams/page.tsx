@@ -1,25 +1,35 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 "use client";
 
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import type { Player } from "@/lib/types";
+
+type TeamClub= {
+  id:string;
+  name:string;
+  players:Player[];
+  createdAt:Date;
+}
 
 export default function TeamsPage() {
-  const [teams, setTeams] = useState<{ id: string; name: string; players: any[] }[]>([]);
+  const [teams, setTeams] = useState<TeamClub[]>();
   const [loading, setLoading] = useState(false);
   const [newTeamName, setNewTeamName] = useState("");
   const [newPlayer, setNewPlayer] = useState({ name: "", position: "", number: "" });
 
   useEffect(() => {
-    fetchTeams();
+   void fetchTeams();
   }, []);
   console.log(teams)
 
   const fetchTeams = async () => {
     setLoading(true);
-    const response = await fetch("/api/teams");
-    const data = await response.json();
-    setTeams(data.teams);
+    const response= await fetch("/api/teams");
+    
+    const data:TeamClub[]= await response.json();
+    setTeams(data);
     setLoading(false);
   };
 
@@ -31,7 +41,7 @@ export default function TeamsPage() {
       headers: { "Content-Type": "application/json" },
     });
     if (response.ok) {
-      fetchTeams();
+      void fetchTeams();
       setNewTeamName("");
     }
   };
@@ -42,7 +52,7 @@ const deleteTeam = async (teamId: string) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ teamId }),
   });
-  fetchTeams();
+  void fetchTeams();
 };
 
 const reassignPlayer = async (playerId: string, newTeamId: string) => {
@@ -62,7 +72,7 @@ const reassignPlayer = async (playerId: string, newTeamId: string) => {
       headers: { "Content-Type": "application/json" },
     });
 
-    fetchTeams();
+    void fetchTeams();
     setNewPlayer({ name: "", position: "", number: "" });
   };
 
@@ -86,7 +96,7 @@ const reassignPlayer = async (playerId: string, newTeamId: string) => {
       {/* List Teams */}
       {loading ? <p>Loading...</p> : (
         <ul>
-          {teams.map((team) => (
+          {teams?.map((team) => (
             <li key={team.id} className="bg-gray-800 p-4 mb-2 rounded-lg">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">{team.name}</h3>
@@ -96,9 +106,9 @@ const reassignPlayer = async (playerId: string, newTeamId: string) => {
               </div>
               <p className="text-sm mt-2">Players:</p>
               <ul className="ml-4">
-                {team.players.length > 0 ? (
+                {team?.players.length > 0 ? (
                   team.players.map((player) => (
-                    <li key={player.id} className="text-sm">
+                    <li key={player?.id} className="text-sm">
                       {player.name} ({player.position}) - #{player.number}
                     </li>
                   ))
