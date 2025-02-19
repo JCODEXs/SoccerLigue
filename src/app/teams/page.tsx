@@ -1,75 +1,43 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 "use client";
-
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { Player } from "@/lib/types";
-import { z } from "zod";
-import { useRouter } from "next/navigation";
+type Team={
 
-
-type TeamClub= {
   id:string;
   name:string;
   players:Player[];
-  createdAt:Date;
+
+}
+
+type TeamClub= {
+  succes:boolean;
+  teams:Team[];
 }
 
 export default function TeamsPage() {
-  const [teams, setTeams] = useState<TeamClub[]>();
+  const [teams, setTeams] = useState<TeamClub>();
   const [loading, setLoading] = useState(false);
   const [newTeamName, setNewTeamName] = useState("");
   const [newPlayer, setNewPlayer] = useState({ name: "", position: "", number: "" });
-const router= useRouter();
+const router=useRouter();
   useEffect(() => {
    void fetchTeams();
   }, []);
-  console.log(teams)
+ 
 
-const teamSchema = z.object({
-  id: z.string().uuid(), // Ensure valid UUID
-  name: z.string().min(1), // Ensure non-empty name
-  players: z.array(z.object({
-    id: z.string().min(1),
-    name: z.string().min(1),
-    position: z.string().min(1),
-    number: z.number().min(1),
-    createdAt: z.date(),
-teamId:z.string()
-    })),
-    createdAt: z.date(),
-
-});
-
-// ✅ Define an array of teams using the schema
-const teamsSchema = z.array(teamSchema);
-
-const fetchTeams = async () => {
-  setLoading(true);
-  try {
-    const response = await fetch("/api/teams");
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch teams: ${response.statusText}`);
-    }
-
-    const jsonData = await response.json();
+  const fetchTeams = async () => {
+    setLoading(true);
+    const response= await fetch("/api/teams");
     
-    // ✅ Validate response data
-    const result = teamsSchema.safeParse(jsonData);
-    if (!result.success) {
-      console.error("Invalid team data received:", result.error);
-      throw new Error("Invalid team data received");
-    }
-
-    setTeams(result.data); 
-  } catch (error) {
-    console.error("Error fetching teams:", error);
-  } finally {
+    const data:TeamClub= await response.json();
+    console.log("data",data)
+    setTeams(data);
     setLoading(false);
-  }
-};
+  };
 
   const createTeam = async () => {
     if (!newTeamName) return;
@@ -131,12 +99,12 @@ const reassignPlayer = async (playerId: string, newTeamId: string) => {
         </Button>
       </div>
 
-     {/* List Teams */}
-{loading ? (
+      {/* List Teams */}
+     {loading ? (
   <p>Loading...</p>
-) : teams.length > 0 ? ( // ✅ Ensure teams exist
+) : teams?.teams&&teams.teams?.length > 0 ? ( // ✅ Ensure teams exist
   <ul>
-    {teams.map((team) => (
+    {teams.teams.map((team) => (
       <li key={team.id} className="bg-gray-800 p-4 mb-2 rounded-lg">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold">{team.name}</h3>
@@ -186,7 +154,7 @@ const reassignPlayer = async (playerId: string, newTeamId: string) => {
     ))}
   </ul>
 ) : (
-  
+  // ✅ Show an option to create a new team when no teams exist
   <div className="text-center mt-4">
     <p className="text-gray-400">No teams available. Create a new team to get started.</p>
     <Button onClick={()=>router.push("/createTeam")} className="mt-2 bg-green-500 hover:bg-green-600">
@@ -194,7 +162,7 @@ const reassignPlayer = async (playerId: string, newTeamId: string) => {
     </Button>
   </div>
 )}
-
+    
     </div>
   );
 }
