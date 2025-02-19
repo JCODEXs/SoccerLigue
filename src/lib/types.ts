@@ -41,7 +41,6 @@ export type MatchEvent = {
 export type Team={
   id:string;
   name:string
-  createdAt: Date
 }
 
 export type Match = {
