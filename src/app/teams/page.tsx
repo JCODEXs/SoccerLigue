@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { Player } from "@/lib/types";
+import { z } from "zod";
+import { useRouter } from "next/navigation";
+
 
 type TeamClub= {
   id:string;
@@ -18,20 +21,55 @@ export default function TeamsPage() {
   const [loading, setLoading] = useState(false);
   const [newTeamName, setNewTeamName] = useState("");
   const [newPlayer, setNewPlayer] = useState({ name: "", position: "", number: "" });
-
+const router= useRouter();
   useEffect(() => {
    void fetchTeams();
   }, []);
   console.log(teams)
 
-  const fetchTeams = async () => {
-    setLoading(true);
-    const response= await fetch("/api/teams");
+const teamSchema = z.object({
+  id: z.string().uuid(), // Ensure valid UUID
+  name: z.string().min(1), // Ensure non-empty name
+  players: z.array(z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+    position: z.string().min(1),
+    number: z.number().min(1),
+    createdAt: z.date(),
+teamId:z.string()
+    })),
+    createdAt: z.date(),
+
+});
+
+// ✅ Define an array of teams using the schema
+const teamsSchema = z.array(teamSchema);
+
+const fetchTeams = async () => {
+  setLoading(true);
+  try {
+    const response = await fetch("/api/teams");
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch teams: ${response.statusText}`);
+    }
+
+    const jsonData = await response.json();
     
-    const data:TeamClub[]= await response.json();
-    setTeams(data);
+    // ✅ Validate response data
+    const result = teamsSchema.safeParse(jsonData);
+    if (!result.success) {
+      console.error("Invalid team data received:", result.error);
+      throw new Error("Invalid team data received");
+    }
+
+    setTeams(result.data); 
+  } catch (error) {
+    console.error("Error fetching teams:", error);
+  } finally {
     setLoading(false);
-  };
+  }
+};
 
   const createTeam = async () => {
     if (!newTeamName) return;
@@ -93,59 +131,70 @@ const reassignPlayer = async (playerId: string, newTeamId: string) => {
         </Button>
       </div>
 
-      {/* List Teams */}
-      {loading ? <p>Loading...</p> : (
-        <ul>
-          {teams?.map((team) => (
-            <li key={team.id} className="bg-gray-800 p-4 mb-2 rounded-lg">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">{team.name}</h3>
-                <Button onClick={() => deleteTeam(team.id)} className="bg-red-500 hover:bg-red-600">
-                  Delete
-                </Button>
-              </div>
-              <p className="text-sm mt-2">Players:</p>
-              <ul className="ml-4">
-                {team?.players.length > 0 ? (
-                  team.players.map((player) => (
-                    <li key={player?.id} className="text-sm">
-                      {player.name} ({player.position}) - #{player.number}
-                    </li>
-                  ))
-                ) : (
-                  <li className="text-gray-400">No players</li>
-                )}
-              </ul>
-
-              {/* Add Player */}
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Input
-                  placeholder="Name"
-                  value={newPlayer.name}
-                  onChange={(e) => setNewPlayer({ ...newPlayer, name: e.target.value })}
-                  className="text-white w-1/3"
-                />
-                <Input
-                  placeholder="Position"
-                  value={newPlayer.position}
-                  onChange={(e) => setNewPlayer({ ...newPlayer, position: e.target.value })}
-                  className="text-white w-1/3"
-                />
-                <Input
-                  type="number"
-                  placeholder="Number"
-                  value={newPlayer.number}
-                  onChange={(e) => setNewPlayer({ ...newPlayer, number: e.target.value })}
-                  className="text-white w-1/3"
-                />
-                <Button onClick={() => addPlayer(team.id)} className="bg-blue-500 hover:bg-blue-600">
-                  Add Player
-                </Button>
-              </div>
-            </li>
-          ))}
+     {/* List Teams */}
+{loading ? (
+  <p>Loading...</p>
+) : teams.length > 0 ? ( // ✅ Ensure teams exist
+  <ul>
+    {teams.map((team) => (
+      <li key={team.id} className="bg-gray-800 p-4 mb-2 rounded-lg">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold">{team.name}</h3>
+          <Button onClick={() => deleteTeam(team.id)} className="bg-red-500 hover:bg-red-600">
+            Delete
+          </Button>
+        </div>
+        <p className="text-sm mt-2">Players:</p>
+        <ul className="ml-4">
+          {team.players.length > 0 ? (
+            team.players.map((player) => (
+              <li key={player.id} className="text-sm">
+                {player.name} ({player.position}) - #{player.number}
+              </li>
+            ))
+          ) : (
+            <li className="text-gray-400">No players</li>
+          )}
         </ul>
-      )}
+
+        {/* Add Player */}
+        <div className="mt-2 flex flex-wrap gap-2">
+          <Input
+            placeholder="Name"
+            value={newPlayer.name}
+            onChange={(e) => setNewPlayer({ ...newPlayer, name: e.target.value })}
+            className="text-white w-1/3"
+          />
+          <Input
+            placeholder="Position"
+            value={newPlayer.position}
+            onChange={(e) => setNewPlayer({ ...newPlayer, position: e.target.value })}
+            className="text-white w-1/3"
+          />
+          <Input
+            type="number"
+            placeholder="Number"
+            value={newPlayer.number}
+            onChange={(e) => setNewPlayer({ ...newPlayer, number: e.target.value })}
+            className="text-white w-1/3"
+          />
+          <Button onClick={() => addPlayer(team.id)} className="bg-blue-500 hover:bg-blue-600">
+            Add Player
+          </Button>
+        </div>
+      </li>
+    ))}
+  </ul>
+) : (
+  
+  <div className="text-center mt-4">
+    <p className="text-gray-400">No teams available. Create a new team to get started.</p>
+    <Button onClick={()=>router.push("/createTeam")} className="mt-2 bg-green-500 hover:bg-green-600">
+      Create New Team
+    </Button>
+  </div>
+)}
+
     </div>
   );
 }
