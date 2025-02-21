@@ -74,7 +74,7 @@ const reassignPlayer = async (playerId: string, newTeamId: string) => {
 
     await fetch("/api/teams", {
       method: "PATCH",
-      body: JSON.stringify({ teamId, ...newPlayer }),
+      body: JSON.stringify({ teamId, name: newPlayer.name, position: newPlayer.position, number: newPlayer.number }),
       headers: { "Content-Type": "application/json" },
     });
 
@@ -108,9 +108,14 @@ const reassignPlayer = async (playerId: string, newTeamId: string) => {
       <li key={team.id} className="bg-gray-800 p-4 mb-2 rounded-lg">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold">{team.name}</h3>
-          <Button onClick={() => deleteTeam(team.id)} className="bg-red-500 hover:bg-red-600">
-            Delete
-          </Button>
+          <div className="flex flex-wrap gap-2 items-center w-1/3">
+            <Button onClick={() => deleteTeam(team.id)} className="bg-red-500 hover:bg-red-600">
+              Delete
+            </Button>
+             <Button onClick={() => router.push(`/createPlayers/${team.id}`)} className="bg-blue-500 hover:bg-blue-600">
+              Add Players
+            </Button>
+          </div>
         </div>
         <p className="text-sm mt-2">Players:</p>
         <ul className="ml-4">
@@ -127,7 +132,7 @@ const reassignPlayer = async (playerId: string, newTeamId: string) => {
 
         {/* Add Player */}
         <div className="mt-2 flex flex-wrap gap-2">
-          <Input
+          {/* <Input
             placeholder="Name"
             value={newPlayer.name}
             onChange={(e) => setNewPlayer({ ...newPlayer, name: e.target.value })}
@@ -145,10 +150,8 @@ const reassignPlayer = async (playerId: string, newTeamId: string) => {
             value={newPlayer.number}
             onChange={(e) => setNewPlayer({ ...newPlayer, number: e.target.value })}
             className="text-white w-1/3"
-          />
-          <Button onClick={() => addPlayer(team.id)} className="bg-blue-500 hover:bg-blue-600">
-            Add Player
-          </Button>
+          /> */}
+         
         </div>
       </li>
     ))}

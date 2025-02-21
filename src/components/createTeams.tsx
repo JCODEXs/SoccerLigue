@@ -12,22 +12,27 @@ export default function CreateTeam() {
   const [players, setPlayers] = useState<{ name: string; position: string; number: number }[]>([]);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const addPlayer = () => {
-    if (!playerName || !position || !number) return;
+    if (!playerName || !position || !number) {
+      setErrorMessage("All fields are required and number must be a valid number.");
+      return;
+    }
     setPlayers([...players, { name: playerName, position, number: Number(number) }]);
     setPlayerName("");
     setPosition("");
     setNumber("");
+    setErrorMessage("");
   };
 
   const createTeam = async () => {
     if (!teamName || players.length === 0) return;
     setLoading(true);
     setSuccessMessage("");
-
+console.log("players",players)
     try {
-      const response = await fetch("/api/create-team", {
+      const response = await fetch("/api/teams", {
         method: "POST",
         body: JSON.stringify({ name: teamName, players }),
         headers: { "Content-Type": "application/json" },
@@ -84,6 +89,8 @@ export default function CreateTeam() {
           Add
         </Button>
       </div>
+
+      {errorMessage && <p className="text-center mt-4 text-red-400">{errorMessage}</p>}
 
       {/* Player List */}
       <div className="mt-4">

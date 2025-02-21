@@ -29,7 +29,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const { name, players } = (await req.json()) as TeamRequest;
-
+console.log("players",players)
     if (!name || typeof name !== "string") {
       return NextResponse.json(
         { success: false, message: "Invalid team name." },
@@ -112,25 +112,37 @@ console.log(team)
 
 export async function PATCH(req: Request) {
   try {
-    const { teamId, name, position, number } = (await req.json()) as PlayerRequest;
+    const { teamId, players } = await req.json() as { teamId: string; players: { name: string; position: string; number: number }[] };
 
-    if (!teamId || !name || !position || typeof number !== "number") {
+    if (!teamId || !Array.isArray(players) || players.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Invalid player data." },
+        { success: false, message: "Invalid team ID or player data." },
         { status: 400 }
       );
     }
 
-    const newPlayer = await db.player.create({
-      data: { name, position, number, teamId },
+    // Validate all players
+    for (const player of players) {
+      if (!player.name || !player.position || typeof player.number !== "number") {
+        return NextResponse.json(
+          { success: false, message: "Each player must have a valid name, position, and number." },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Insert all players in one transaction
+    const newPlayers = await db.player.createMany({
+      data: players.map(player => ({ ...player, teamId })),
     });
 
-    return NextResponse.json({ success: true, player: newPlayer }, { status: 201 });
+    return NextResponse.json({ success: true, players: newPlayers }, { status: 201 });
   } catch (error) {
-    console.error("Error adding player:", (error as Error).stack ?? error);
+    console.error("Error adding players:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to add player. Please try again later." },
+      { success: false, message: "Failed to add players. Please try again later." },
       { status: 500 }
     );
   }
 }
+// Compare this snippet from src/app/api/teams/route.ts:

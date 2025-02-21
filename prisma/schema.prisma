@@ -1,8 +1,11 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
+//copilot read this file and help me undestand why my database in not conecting to the postgresql database that i have in supabase
+
 
 generator client {
     provider = "prisma-client-js"
+    
 }
 
 datasource db {
