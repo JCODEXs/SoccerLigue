@@ -11,8 +11,8 @@ const ViewResultsPage = ({
 }) =>{
 const { slug } = use(params);
   console.log(slug)
-  const [matchSummary, setMatchSummary] = useState<MatchData| null>(null);
-  const [match, setMatch] = useState<Match>([]);
+  const [matchSummary, setMatchSummary] = useState<MatchData| undefined>(undefined);
+  const [match, setMatch] = useState<Match>();
   const [homeTeam, sethomeTeam] = useState<string>();
   const [awayTeam, setawayTeam] = useState<string>();
 console.log("hometeam",homeTeam)
@@ -79,7 +79,7 @@ console.log("hometeam",homeTeam)
 
     events.forEach((event) => {
       const { team, type, card } = event;
-      console.log(event,team,homeTeam,team==homeTeam)
+   
       if (team===homeTeam) 
       
    {
@@ -104,6 +104,10 @@ console.log("hometeam",homeTeam)
      
 
     });
+
+     if(!match){
+return;
+    }
     matchData.homeTeam = {name:homeTeam??"",id:match?.homeTeamId??""};
     matchData.awayTeam = {name:awayTeam??"",id:match?.awayTeamId??""};
     matchData.Location= match.Location;
