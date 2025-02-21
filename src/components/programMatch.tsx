@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button"; // Button de shadcn/ui
 // import { useMatchStore } from "@/app/stores/matchStore";
 import { getTeamsAndLocations, saveMatchToDatabase } from "@/app/actions/actions"; 
 import type { Location, Team } from "@/lib/types";
-import { faker } from "@faker-js/faker";
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+import { faker } from "@faker-js/faker"
 const locations:Location[] = Array.from({ length: 3 }, () => ({ name: faker.location.city(), id: faker.number.int().toString() }));
 const Referees = [
   "James",
@@ -74,10 +73,10 @@ const ProgramMatch: React.FC = () => {
 
       const TeamsandLocations = await getTeamsAndLocations()
       console.log("teams",TeamsandLocations)
-      const {teams,Locations} = TeamsandLocations
+      const {teams} = TeamsandLocations
       if(TeamsandLocations){
         setTeams(teams)
-        setLocations(Locations)
+        setLocations(locations)
       }
     }
 void dataFetch()
