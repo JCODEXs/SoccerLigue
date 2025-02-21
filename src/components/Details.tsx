@@ -1,8 +1,12 @@
 "use client"; // Marca el componente como del lado del cliente
 
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useState } from "react";
 import type { Match } from "@/lib/types";
+import { formatDateToLetters, validateMatchData } from "@/lib/utils";
+import { Calendar } from "./ui/calendar";
+import { findMatch, updateMatchInDatabase } from "@/app/actions/actions";
+import { useRouter } from "next/navigation";
 
 interface DetailsProps {
   match: Match; 
@@ -21,6 +25,25 @@ const Referees = [
   "Referee D",
   "Referee E",
 ];
+const times = [
+  "10:00",
+  "10:30",
+  "11:00",
+  "11:30",
+  "12:00",
+  "12:30",
+  "13:00",
+  "13:30",
+  "14:00",
+  "14:30",
+  "15:00",
+  "15:30",
+  "16:00",
+  "16:30",
+  "17:00",
+  "17:30",
+  "18:00",
+];
 
 export default function Details({match}:DetailsProps){
  
@@ -28,14 +51,44 @@ export default function Details({match}:DetailsProps){
  const [location, setLocation] = useState<string>("");
   const [referee,setReferee] = useState<string|null>(match?.referee);
   const [isEditable, setIsEditable] = useState<boolean>(false);
-    const [date, setDate] = useState<Date >(new Date());
+    const [date, setDate] = useState<Date | undefined >(new Date());
   const [time, setTime] = useState<string>("10:50");
-  /// crear inputs para hora y fecha
-
+  const router = useRouter();
  
 
+ useEffect(() => {
+  if (match) {
+      try {
+        const matchDate = new Date(match?.date); // Match start time
+        const matchCreation = new Date(match?.createdAt); // When the match was created
+        const currentDate = new Date()
+        const twoHoursAfterMatch = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000); // 2 hours after start
+        const matchDuration = 105 * 60 * 1000; // 90 minutes in milliseconds
+        const matchEndTime = new Date(matchDate.getTime() + matchDuration); // Match end time
+       
+
+        // console.log("Current date:", currentDate);
+        // console.log("Match date:", matchDate);
+        // console.log("Match end time:", matchEndTime);
+        // console.log("Two hours after match:", twoHoursAfterMatch);
+
+        // Check if the match is editable
+        setIsEditable(currentDate > matchCreation && currentDate < twoHoursAfterMatch);
+
+        // Check if the match has ended
+        // setIsReadyForResults(currentDate > matchDate);
+
+        // Check if results are available (assuming `matchData.results` exists)
+        // setIsResultsAvailable(matchData.results && matchData.results.length > 0);
+      } catch (error) {
+        console.error("Error decoding match data:", error);
+      }
+    }
+   } , [match])
+
+
   // Manejar el envío del formulario de edición
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!match) return;
     // Aquí puedes agregar la lógica para guardar los cambios en la base de datos
@@ -43,10 +96,25 @@ export default function Details({match}:DetailsProps){
       ...match,
       location: location,
       referee: referee,
-    };
+      date: date,
+      time: time,
 
-    console.log("Updated Match:", updatedMatch);
+    };
+    let validatedMatch;
+    try {
+      
+      validatedMatch = validateMatchData(updatedMatch);
+    } catch (error) {
+      console.error("Validation error:", error);
+      return;
+    }
+    
+    const updatedMatchReq= await updateMatchInDatabase(match.id,validatedMatch);
+
+    console.log("Updated Match:", updatedMatchReq);
     alert("Match details updated successfully!");
+ 
+    router.push("/matches");
   };
 
   if (!match) {
@@ -59,77 +127,101 @@ console.log("Is editable:", isEditable);
 
   return (
     <div className="p-6 bg-gray-800 text-white rounded-lg shadow-lg m-6">
-     <div className="flex flex-col justify-around gap-6 p-2 bg-gray-100 rounded-lg shadow-md">
-      <h1 className=" flex justify-around text-3xl font-bold mb-4 text-gray-700">
+      <h1 className=" flex justify-around text-3xl font-bold mb-4 text-orange-700">
         {match?.homeTeam?.name} vs {match?.awayTeam?.name}
-      <p className="text-lg mb-2">
-{new Date(match?.date).toLocaleDateString()} at {match?.time}
-      </p>
       </h1>
-     <div className="flex flex-row justify-around gap-6 p-2 bg-gray-100 rounded-lg shadow-md">
-
-  <p className="text-lg text-gray-700">
+     <div className="flex flex-row justify-around flex-wrap gap-4 p-2 bg-gray-700 rounded-lg shadow-md mb-2">
+  <p className="text-lg ">
     <span className="font-bold text-primary">Location:</span> {match?.Location?.name}
   </p>
-  <p className="text-lg text-gray-700">
+  <p className="text-lg ">
     <span className="font-bold text-primary">Referee:</span> {match?.referee ?? "Not assigned"}
   </p>
+       <p className="text-lg xl:text-xl">
+{formatDateToLetters(match?.date)} at {match?.time}
+      </p>
 </div>
-</div>
+     <div className="flex flex-row justify-around gap-6 p-2 bg-gray-100 rounded-lg shadow-md">
 
+</div>
 
       {isEditable ? (
-        <div className="flex flex-col items-center pt-4">
-          <h2 className="text-2xl font-bold mb-4">Edit Match Details</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="location" className="block text-lg mb-1">
-                Location
-              </label>
-              <select 
-              onChange={(e)=>setLocation(e.target.value)}
-              value={match?.Location.name}
-              className=" p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400">
-                <option value={match?.Location.name}>{match?.Location.name}</option>
-                {Locations.map((location)=>
-                <option key={location} value={location}>{location}</option>)}
-              </select>
-              {/* <input
-                type="text"
-                id="location"
-                defaultValue={match?.location}
-                className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400"
-              /> */}
+        <form onSubmit={handleSubmit} className="space-y-4 flex flex-col gap-2 p-2 rounded-lg shadow-md ">
+            <div className="flex flex-row justify-around mt-3">
+              <h2 className="text-xl font-bold mb-4 text-center">Edit Match Details</h2>
+                 <button
+                  type="submit"
+                  className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200"
+                >
+                  Save changes
+                </button>
             </div>
-            <div>
-              <label htmlFor="Referee" className="block text-lg mb-1">
-                Referee
-              </label>
-              <select 
-              onChange={(e)=>setReferee(e.target.value)}
-              value={match?.referee??""} className=" p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400">
-                <option value={match?.referee??""}>{match?.referee ?? "Not assigned"}</option>
-                {Referees.map((referee)=>
-                <option key={referee} value={referee}>{referee}</option>)}
+              <div className="flex flex-col gap-2 md:flex-row md:gap-4 md: justify-around">
 
-              </select>
-              {/* <input
-                type="text"
-                id="referee"
-                defaultValue={match?.referee || ""}
-                className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400"
-              /> */}
-            </div>
-            <button
-              type="submit"
-              className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200"
-            >
-              Save
-            </button>
-          </form>
-        </div>
+            <div className="grid grid-cols-2 sm:grid-cols:3 md:grid-cols-1 items-center pt-2 justify-around gap-2">
+              <div>
+                <label htmlFor="location" className="block text-lg mb-1">
+                  Location
+                </label>
+                <select
+                onChange={(e)=>setLocation(e.target.value)}
+                value={location}
+                className=" p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400">
+                  <option value={match?.Location.name}>{match?.Location.name}</option>
+                  {Locations.map((location)=>
+                  <option key={location} value={location}>{location}</option>)}
+                </select>
+            
+              </div>
+              <div>
+                <label htmlFor="time" className="block text-lg mb-1">
+                  time
+                </label>
+                <select
+                onChange={(e)=>setTime(e.target.value)}
+                value={time}
+                className=" p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400">
+                  <option value={match?.time}>{match?.time}</option>
+                  {times.map((time)=>
+                  <option key={time} value={time}>{time}</option>)}
+                </select>
+            
+              </div>
+              <div>
+                <label htmlFor="Referee" className="block text-lg mb-1">
+                  Referee
+                </label>
+                <select
+                onChange={(e)=>setReferee(e.target.value)}
+                value={referee??""} className=" p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400">
+                  <option value={match?.referee??""}>{match?.referee ?? "Not assigned"}</option>
+                  {Referees.map((referee)=>
+                  <option key={referee} value={referee}>{referee}</option>)}
+                </select>
+             
+              </div>
+                    </div>
+              <div className=" w-full pt-2 md:w-1/2">
+                <label htmlFor="date" className=" text-lg mb-1">
+                  date
+                </label>
+              
+                <div className=" flex w-1/2">
+                  <Calendar
+                            mode="single"
+                            selected={date}
+                            onSelect={setDate}
+                            className="rounded-lg border border-gray-700"
+                            />
+                </div>
+             
+              </div>
+              </div>
+           
+            </form>
+          
       ) : (
-        <p className="text-red-500 text-lg">
+        <p className="text-red-500 text-lg flex justify-center m-2 pt-4">
           This match cannot be edited anymore.
         </p>
       )}

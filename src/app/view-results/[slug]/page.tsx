@@ -2,7 +2,7 @@
 import Scoreboard from "@/components/scoreBoard";
 import React, { use, useEffect, useState } from "react";
 import { findMatch } from "../../actions/actions";
-import type { MatchData, MatchEvent, TeamStats } from "@/lib/types";
+import type { Match, MatchData, MatchEvent, TeamStats } from "@/lib/types";
 
 const ViewResultsPage = ({
     params,
@@ -12,6 +12,7 @@ const ViewResultsPage = ({
 const { slug } = use(params);
   console.log(slug)
   const [matchSummary, setMatchSummary] = useState<MatchData| null>(null);
+  const [match, setMatch] = useState<Match>([]);
   const [homeTeam, sethomeTeam] = useState<string>();
   const [awayTeam, setawayTeam] = useState<string>();
 console.log("hometeam",homeTeam)
@@ -19,7 +20,7 @@ console.log("hometeam",homeTeam)
     const fetchMatchData = async () => {
       try {
          if (!slug) return;
-        const matchDataP = await findMatch(slug);
+        const matchDataP:Match|null = await findMatch(slug);
      
   if (!matchDataP) {
   console.error("Match not found");
@@ -28,6 +29,7 @@ console.log("hometeam",homeTeam)
   const { events: GameEvents } = matchDataP; // Now it's safe to destructure
     console.log("este", matchDataP);
     sethomeTeam(matchDataP.homeTeam?.name)
+    setMatch(matchDataP);
     setawayTeam(matchDataP.awayTeam?.name)
         const generatedData = generateMatchData(GameEvents);
         setMatchSummary(generatedData);
@@ -102,7 +104,12 @@ console.log("hometeam",homeTeam)
      
 
     });
-
+    matchData.homeTeam = {name:homeTeam??"",id:match?.homeTeamId??""};
+    matchData.awayTeam = {name:awayTeam??"",id:match?.awayTeamId??""};
+    matchData.Location= match.Location;
+    matchData.referee = match.referee??"";
+    matchData.date = match.date??"";
+    matchData.time = match.time??"";
     matchData.scoreA = teamStats.homeTeam?.goals || 0;
     matchData.scoreB = teamStats.awayTeam?.goals || 0;
     matchData.stats.shots.homeTeam = teamStats.homeTeam?.shots || 0;
@@ -115,7 +122,7 @@ console.log("hometeam",homeTeam)
     matchData.stats.fouls.awayTeam = teamStats.awayTeam?.fouls || 0;
     matchData.stats.cards.homeTeam = teamStats.homeTeam?.cards || 0;
     matchData.stats.cards.awayTeam = teamStats.awayTeam?.cards || 0;
-console.log("que cosa",matchData)
+console.log("que cosa",matchData,match)
     return matchData;
   }
 

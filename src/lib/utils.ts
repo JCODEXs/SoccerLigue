@@ -14,3 +14,28 @@ export function formatDateToLetters(date: string | Date, locale = "en-US"): stri
     day: "numeric",
   });
 }
+
+export function validateMatchData(match: {
+  homeTeamId: string | null;
+  awayTeamId: string | null;
+  locationId: string | null;
+  date: Date | undefined;
+  referee: string | null;
+  time: string | null;
+}) {
+  console.log(match);
+  if (!match.homeTeamId || !match.awayTeamId || !match.locationId || !match.date || !match.time) {
+    throw new Error("Match data is incomplete or invalid.");
+  }
+
+  return {
+    homeTeamId: match.homeTeamId , // Ensured non-null
+    awayTeamId: match.awayTeamId ,
+    locationId: match.locationId ,
+    date: match.date ,
+    referee: match.referee ?? "No Referee Assigned", // Default if null
+    time: match.time ,
+  };
+}
+
+

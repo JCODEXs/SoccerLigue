@@ -55,6 +55,34 @@ export async function saveMatchToDatabase(match: {
     return { success: false, message: "Internal server error" };
   }
 }
+export async function updateMatchInDatabase(matchId: string, updatedMatch: {
+  homeTeamId: string;
+  awayTeamId: string;
+  locationId: string;
+  date: Date;
+  referee: string;
+  time: string;
+}) {
+  try {
+    const updatedMatchRecord = await db.match.update({
+      where: { id: matchId },
+      data: {
+        homeTeamId: updatedMatch.homeTeamId,
+        awayTeamId: updatedMatch.awayTeamId,
+        locationId: updatedMatch.locationId,
+        date: updatedMatch.date,
+        time: updatedMatch.time,
+        referee: updatedMatch.referee,
+      },
+    });
+
+    return { success: true, match: updatedMatchRecord };
+  } catch (error) {
+    console.error("Error updating match in database:", error);
+    return { success: false, message: "Internal server error" };
+  }
+}
+
 type MatchEvent = {
   type: string;
   team: string;
@@ -72,7 +100,7 @@ type MatchEvent = {
 };
 
 export async function saveMatchData({ matchData }: { matchData: MatchData }) {
-  console.log("Saving match data:", matchData);
+  console.log("Saving match data: (server)", matchData);
 
   const { events, matchId, homeTeam, awayTeam }: MatchData = matchData;
 
@@ -123,7 +151,7 @@ export async function saveMatchData({ matchData }: { matchData: MatchData }) {
 
 
 //     console.log("Match and events saved successfully!");
-//     return { success: true, match: updatedMatch };
+   return { success: true, message: "Match and events saved successfully!" };
 
   }  catch (error) {
   console.error("Error saving match data:", error);

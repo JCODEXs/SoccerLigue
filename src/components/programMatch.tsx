@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"; // Button de shadcn/ui
 // import { useMatchStore } from "@/app/stores/matchStore";
 import { getTeamsAndLocations, saveMatchToDatabase } from "@/app/actions/actions"; 
 import type { Location, Team } from "@/lib/types";
+import { useRouter } from "next/navigation";
 
 const Referees = [
   "James",
@@ -25,7 +26,7 @@ const ProgramMatch: React.FC = () => {
   const [referee, setReferee] = useState<string>("");
   const [teams, setTeams] = useState<Team[]>([]);
   const [Locations, setLocations] = useState<Location[]|undefined>([]);
-
+ const router = useRouter(); 
   // Zustand store para manejar el estado local
   // const { addMatch } = useMatchStore();
 
@@ -57,6 +58,7 @@ const ProgramMatch: React.FC = () => {
         // Agregar el partido al estado local usando Zustand
         // addMatch(match);
         alert("Match scheduled successfully!");
+         router.push("/matches");
       } else {
         alert("Failed to schedule match. Please try again.");
       }

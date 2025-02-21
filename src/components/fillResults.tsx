@@ -2,12 +2,13 @@
 import { fetchPlayersByTeam, saveMatchData } from "@/app/actions/actions";
 import React, { useEffect, useState } from "react";
 import type { Event, Player, SavedMatchData, Match } from "@/lib/types";
+import { useRouter } from "next/navigation";
 
 
 const FillResults: React.FC<{ match: Match }> = ({ match }) => {
   console.log(match)
   const { homeTeamId, awayTeamId, homeTeam, awayTeam,id,date,locationId } = match;
-  const [selectedTeam, setSelectedTeam] = useState<string>("");
+  const [selectedTeam, setSelectedTeam] = useState<string>(homeTeam?.name ?? "");
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [card, setCard] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<string>("goal");
@@ -22,7 +23,7 @@ const FillResults: React.FC<{ match: Match }> = ({ match }) => {
   const [substitutePlayersA, setSubstitutePlayersA] = useState<Player[]|[]>([]); 
   const [substitutePlayersB, setSubstitutePlayersB] = useState<Player[]|[]>([]); 
   const [substitutePlayer, setSubstitutePlayer] = useState<string | null>(null); 
-
+  const router=useRouter();
   // custom functions
 const handleSave = async () => {
   try {
@@ -45,6 +46,7 @@ const handleSave = async () => {
 
     if (response?.success) {
       alert("Match saved successfully!");
+       router.push("/view-results"+`/${id}`);
     } else {
       console.error("Error saving match:", response);
       alert(`Error saving match: ${response?.message ?? "Unknown error"}`);
@@ -199,8 +201,9 @@ const updateAvailablePlayers = (event: Event) => {
         <div className="flex flex-row justify-between">
           <h2 className="text-xl font-bold text-orange-500 flex-grow-1 w-1/2 p-2">Manage Match Events</h2>  
            <button
-            className="m-2 bg-teal-600 text-white text-lg p-2 rounded border-teal-700  "
+            className="m-2 bg-teal-600 text-white text-lg p-2 rounded border-teal-700 disabled:bg-gray-400 disabled:cursor-not-allowed "
             onClick={handleSave}
+            disabled={events.length === 0}
           >
             Save match
           </button>
