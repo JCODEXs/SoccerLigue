@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button"; // Button de shadcn/ui
 // import { useMatchStore } from "@/app/stores/matchStore";
 import { getTeamsAndLocations, saveMatchToDatabase } from "@/app/actions/actions"; 
 import type { Location, Team } from "@/lib/types";
-import { faker } from "@faker-js/faker"
-const locations:Location[] = Array.from({ length: 3 }, () => ({ name: faker.location.city(), id: faker.number.int().toString() }));
+
 const Referees = [
   "James",
   "Carl",
@@ -25,7 +24,7 @@ const ProgramMatch: React.FC = () => {
   const [locationId, setLocation] = useState<string>("");
   const [referee, setReferee] = useState<string>("");
   const [teams, setTeams] = useState<Team[]>([]);
-  const [Locations, setLocations] = useState<Location[]|undefined>(locations);
+  const [Locations, setLocations] = useState<Location[]|undefined>([]);
 
   // Zustand store para manejar el estado local
   // const { addMatch } = useMatchStore();
@@ -73,10 +72,10 @@ const ProgramMatch: React.FC = () => {
 
       const TeamsandLocations = await getTeamsAndLocations()
       console.log("teams",TeamsandLocations)
-      const {teams} = TeamsandLocations
+      const {teams,Locations} = TeamsandLocations
       if(TeamsandLocations){
         setTeams(teams)
-        setLocations(locations)
+        setLocations(Locations)
       }
     }
 void dataFetch()
