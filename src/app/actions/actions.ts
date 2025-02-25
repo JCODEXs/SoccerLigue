@@ -1,6 +1,6 @@
 "use server";
 
-import type { Match } from "@/lib/types";
+import type { Match, Team } from "@/lib/types";
 import { db } from "@/server/db";
 
 
@@ -22,6 +22,7 @@ export async function findMatch(id: string) {
         }
       },
       Location:true,
+      referee:true
       
     },
   });
@@ -29,12 +30,28 @@ export async function findMatch(id: string) {
   return match;
 }
 
+export async function findPlayersByTeam(teamId: string) {
+  const players = await db.player.findMany({
+    where: { teamId },
+  });
+
+  return players;
+}
+export async function findTeam(teamId: string) {
+  const team = await db.team.findMany({
+    where: { id:teamId },
+  });
+
+  return team;
+}
+
+
 export async function saveMatchToDatabase(match: {
   homeTeamId: string;
   awayTeamId: string;
   locationId: string;
   date: Date;
-  referee: string;
+  refereeId: string;
   time: string;
 }) {
   try {
@@ -45,7 +62,7 @@ export async function saveMatchToDatabase(match: {
         locationId: match.locationId,
         date: match.date,
         time: match.time,
-        referee: match.referee,
+        refereeId: match.refereeId,
       },
     });
 
@@ -60,7 +77,7 @@ export async function updateMatchInDatabase(matchId: string, updatedMatch: {
   awayTeamId: string;
   locationId: string;
   date: Date;
-  referee: string;
+  refereeId: string;
   time: string;
 }) {
   try {
@@ -72,7 +89,7 @@ export async function updateMatchInDatabase(matchId: string, updatedMatch: {
         locationId: updatedMatch.locationId,
         date: updatedMatch.date,
         time: updatedMatch.time,
-        referee: updatedMatch.referee,
+        refereeId: updatedMatch.refereeId,
       },
     });
 
@@ -172,8 +189,11 @@ export async function getTeamsAndLocations() {
     const Locations = await db.location.findMany({
       select: { id: true, name: true },
     });
+    const Referees = await db.referee.findMany({
+      select: { id: true, name: true },
+    }); 
 
-    return { teams, Locations };
+    return { teams, Locations,Referees };
   } catch (error) {
     console.error("Error fetching teams and locations:", error);
     return { teams: [], locations: [] };
@@ -186,3 +206,37 @@ export async function fetchPlayersByTeam  (teamName: string) {
     include: { players: true },
   });
 };
+export async function createRefereeAction(newreferee:string){
+ try {
+    if (!newreferee || typeof newreferee !== "string") {
+      throw new Error("Invalid referee name");
+    }
+  const Referee= await db.referee.create({
+    data: {
+      name: newreferee,
+    }
+  });
+  return Referee;
+  
+}catch(error){
+  console.error("Error creating referee:", error);
+  return null;
+}
+}
+export async function createLocationAction(newLocation:string){
+ try {
+    if (!newLocation || typeof newLocation !== "string") {
+      throw new Error("Invalid Location name");
+    }
+  const Location= await db.location.create({
+    data: {
+      name: newLocation,
+    }
+  });
+  return Location;
+  
+}catch(error){
+  console.error("Error creating Location:", error);
+  return null;
+}
+}

@@ -113,7 +113,7 @@ console.log(team)
 export async function PATCH(req: Request) {
   try {
     const { teamId, players } = await req.json() as { teamId: string; players: { name: string; position: string; number: number }[] };
-
+console.log(teamId,players)
     if (!teamId || !Array.isArray(players) || players.length === 0) {
       return NextResponse.json(
         { success: false, message: "Invalid team ID or player data." },
@@ -135,6 +135,7 @@ export async function PATCH(req: Request) {
     const newPlayers = await db.player.createMany({
       data: players.map(player => ({ ...player, teamId })),
     });
+    console.log("new player",newPlayers)
 
     return NextResponse.json({ success: true, players: newPlayers }, { status: 201 });
   } catch (error) {
@@ -145,4 +146,3 @@ export async function PATCH(req: Request) {
     );
   }
 }
-// Compare this snippet from src/app/api/teams/route.ts:

@@ -35,13 +35,16 @@ export default function Header() {
               { href: "/view-results", text: "View results" },
               { href: "/matches", text: "View Programming" },
               { href: "/login", text: "Login" },
+              { href: "/createReferee", text: "Add Referee" },
+              { href: "/createLocation", text: "Add Location" },
             ].map(({ href, text }) => (
               <li
                 key={href}
                 className="hover:bg-teal-700 px-4 py-2 rounded-md transition-colors duration-200"
-                onClick={closeMenu} // Close menu when clicking a link
               >
-                <Link href={href}>{text}</Link>
+                <Link 
+                onClick={closeMenu} // Close menu when clicking a link
+                href={href}>{text}</Link>
               </li>
             ))}
           </ul>

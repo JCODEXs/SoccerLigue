@@ -94,7 +94,7 @@ const reassignPlayer = async (playerId: string, newTeamId: string) => {
           onChange={(e) => setNewTeamName(e.target.value)}
           className="text-white mb-2"
         />
-        <Button onClick={createTeam} className="bg-green-500 hover:bg-green-600 w-full">
+        <Button onClick={createTeam} className="bg-teal-600 hover:bg-teal-800 w-full">
           Create Team
         </Button>
       </div>
@@ -112,23 +112,39 @@ const reassignPlayer = async (playerId: string, newTeamId: string) => {
             <Button onClick={() => deleteTeam(team.id)} className="bg-red-500 hover:bg-red-600">
               Delete
             </Button>
-             <Button onClick={() => router.push(`/createPlayers/${team.id}`)} className="bg-blue-500 hover:bg-blue-600">
-              Add Players
+             <Button onClick={() => router.push(`/createPlayers/${team.id}`)} className="bg-orange-500 hover:bg-blue-600">
+              Edit Team
             </Button>
           </div>
         </div>
-        <p className="text-sm mt-2">Players:</p>
-        <ul className="ml-4">
-          {team.players.length > 0 ? (
-            team.players.map((player) => (
-              <li key={player.id} className="text-sm">
-                {player.name} ({player.position}) - #{player.number}
-              </li>
-            ))
-          ) : (
-            <li className="text-gray-400">No players</li>
-          )}
-        </ul>
+     {/* <label className="text-md mt-3">Players:</label> */}
+
+{team.players.length > 0 ? (
+  <table className="min-w-full border-collapse border shadow-md rounded-full">
+    <caption className="caption-top text-gray-400">Players List
+
+    </caption>
+    <thead>
+      <tr className="bg-teal-800 text-gray-800 ">
+        <th className="border border-gray-300 px-4 py-2 text-left">Name</th>
+        <th className="border border-gray-300 px-4 py-2 text-left">Position</th>
+        <th className="border border-gray-300 px-4 py-2 text-left">Number</th>
+      </tr>
+    </thead>
+    <tbody>
+      {team.players.map((player) => (
+        <tr key={player.name} className="odd:bg-gray-400 bg-gray-500 hover:bg-teal-200 transition-colors duration-200">
+          <td className="border border-gray-300 px-4 py-2 text-black">{player.name}</td>
+          <td className="border border-gray-300 px-4 py-2 text-black">{player.position}</td>
+          <td className="border border-gray-300 px-4 py-2 text-center text-black">{player.number}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+) : (
+  <p className="text-gray-400">No players</p>
+)}
+
 
         {/* Add Player */}
         <div className="mt-2 flex flex-wrap gap-2">

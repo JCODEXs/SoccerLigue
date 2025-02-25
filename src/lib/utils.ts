@@ -38,4 +38,25 @@ export function validateMatchData(match: {
   };
 }
 
+export const footballPositions = [
+  { name: "Goalkeeper", abbreviation: "GK" },
+  { name: "Sweeper", abbreviation: "SW" },
+  { name: "Center Back", abbreviation: "CB" },
+  { name: "Right Back", abbreviation: "RB" },
+  { name: "Left Back", abbreviation: "LB" },
+  { name: "Right Wing Back", abbreviation: "RWB" },
+  { name: "Left Wing Back", abbreviation: "LWB" },
+  { name: "Defensive Midfielder", abbreviation: "DM" },
+  { name: "Center Midfielder", abbreviation: "CM" },
+  { name: "Right Midfielder", abbreviation: "RM" },
+  { name: "Left Midfielder", abbreviation: "LM" },
+  { name: "Attacking Midfielder", abbreviation: "AM" },
+  { name: "Right Winger", abbreviation: "RW" },
+  { name: "Left Winger", abbreviation: "LW" },
+  { name: "Center Forward", abbreviation: "CF" },
+  { name: "Striker", abbreviation: "ST" },
+];
+
+
+
 

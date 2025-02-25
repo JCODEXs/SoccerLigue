@@ -9,12 +9,7 @@ import { getTeamsAndLocations, saveMatchToDatabase } from "@/app/actions/actions
 import type { Location, Team } from "@/lib/types";
 import { useRouter } from "next/navigation";
 
-const Referees = [
-  "James",
-  "Carl",
-  "Jorge",
-  "David",
-];
+
 
 const ProgramMatch: React.FC = () => {
   // Estados para los equipos, fecha, hora y lugar
@@ -23,8 +18,9 @@ const ProgramMatch: React.FC = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [time, setTime] = useState<string>("10:50");
   const [locationId, setLocation] = useState<string>("");
-  const [referee, setReferee] = useState<string>("");
+  const [referee, setReferee] = useState<Team | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [Referees, setReferees] = useState<Team[]|undefined>([]);
   const [Locations, setLocations] = useState<Location[]|undefined>([]);
  const router = useRouter(); 
   // Zustand store para manejar el estado local
@@ -47,7 +43,7 @@ const ProgramMatch: React.FC = () => {
       date,
       time,
       locationId,
-      referee,
+      refereeId: referee?.id ?? "",
     };
 
     try {
@@ -74,10 +70,11 @@ const ProgramMatch: React.FC = () => {
 
       const TeamsandLocations = await getTeamsAndLocations()
       console.log("teams",TeamsandLocations)
-      const {teams,Locations} = TeamsandLocations
+      const {teams,Locations,Referees} = TeamsandLocations
       if(TeamsandLocations){
         setTeams(teams)
         setLocations(Locations)
+        setReferees(Referees)
       }
     }
 void dataFetch()
@@ -100,7 +97,7 @@ void dataFetch()
             <option value="" disabled>
               Select a team
             </option>
-            {teams?.map((team) => (
+            {teams?.filter((team)=>team.id!=awayTeamId)?.map((team) => (
               <option key={team?.id} value={team.id}>
                 {team.name}
               </option>
@@ -119,7 +116,7 @@ void dataFetch()
             <option value="" disabled>
               Select a team
             </option>
-            {teams?.map((team) => (
+            {teams?.filter((team)=>team.id!=homeTeamId)?.map((team) => (
               <option key={team.id} value={team.id}>
                 {team.name}
               </option>
@@ -171,18 +168,23 @@ void dataFetch()
            {/* Match Referee */}
         <div className="mt-6 space-y-2">
           <label className="text-lg text-orange-400">Referee</label>
-          <select
-            value={referee}
-            onChange={(e) => setReferee(e.target.value)}
-            className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
-            >
-              <option value="" disabled>
-                </option>
-                Select a Referee
-                {Referees.map((Referee)=>
-               
-                <option  key={Referee} value={Referee}>{Referee}</option>)}
-             </select> 
+        <select
+  value={referee?.id ?? ""}
+  onChange={(e) => {
+    const selectedReferee = Referees?.find(r => r.id === e.target.value);
+    setReferee(selectedReferee ?? null);
+  }}
+  className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+>
+  <option value="" disabled>
+    Select a Referee
+  </option>
+  {Referees?.map((Referee) => (
+    <option key={Referee.id} value={Referee.id}>
+      {Referee.name}
+    </option>
+  ))}
+</select>
         </div>
             </div>
         </div>
@@ -192,7 +194,8 @@ void dataFetch()
         <div className="flex justify-center">
           <Button
             type="submit"
-            className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200"
+            disabled={!homeTeamId || !awayTeamId || !date || !time || !locationId}
+            className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 disabled:bg-gray-500"
           >
             Schedule Match
           </Button>

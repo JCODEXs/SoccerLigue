@@ -42,6 +42,10 @@ export type Team={
   id:string;
   name:string
 }
+export type Referee = {
+  id: string;
+  name: string;
+};
 
 export type Match = {
   id: string;
@@ -50,7 +54,7 @@ export type Match = {
   locationId: string;
   date: Date;
   time: string;
-  referee: string|null;
+  referee: Team|null;
   events: MatchEvent[];
   homeTeam: Team | null;
   awayTeam: Team | null;
