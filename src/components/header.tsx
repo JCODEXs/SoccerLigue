@@ -1,13 +1,20 @@
 "use client"; // Enable client-side interactivity
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false); // Close menu when clicking a link
+  const router = useRouter();
+  
+  const handleClick = (href: string) => {
+    closeMenu();
+    router.push(href); // Navigate programmatically
+  };
 
   return (
     <div className="fixed top-0 left-0 w-full z-50">
@@ -42,9 +49,9 @@ export default function Header() {
                 key={href}
                 className="hover:bg-teal-700 px-4 py-2 rounded-md transition-colors duration-200"
               >
-                <Link 
-                onClick={closeMenu} // Close menu when clicking a link
-                href={href}>{text}</Link>
+                 <button onClick={() => handleClick(href)} className="w-full text-left">
+    {text}
+  </button>
               </li>
             ))}
           </ul>
