@@ -24,11 +24,14 @@ export default function Header() {
           OPTIONS
         </p>
 
-        {/* Menu Content (Shows on hover OR click) */}
+        {/* Menu Content (Shows on hover OR click)   group-hover:translate-y-0*/}
         <div
           className={`transition-all duration-300 ease-in-out transform ${
             isMenuOpen ? "translate-y-0" : "-translate-y-full"
-          } group-hover:translate-y-0`}
+          } 
+        
+
+          `}
           style={{
             backgroundImage: "url('/backgroundheader.png')",
             backgroundSize: "cover",
