@@ -127,7 +127,7 @@ console.log("match",data)
               </div>
               <div className="text-sm text-gray-300  ">
                 Referee: {""}
-                {match?.referee}
+                {match?.referee?.name}
               </div>
                 </div>
               </div>
