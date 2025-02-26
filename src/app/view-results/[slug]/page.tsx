@@ -15,7 +15,7 @@ const { slug } = use(params);
   const [match, setMatch] = useState<Match>();
   const [homeTeam, sethomeTeam] = useState<string>();
   const [awayTeam, setawayTeam] = useState<string>();
-console.log("hometeam",homeTeam)
+// console.log("hometeam",homeTeam)
   useEffect(() => {
     const fetchMatchData = async () => {
       try {
@@ -32,7 +32,7 @@ console.log("hometeam",homeTeam)
     setMatch(matchDataP);
     setawayTeam(matchDataP.awayTeam?.name)
         const generatedData = generateMatchData(GameEvents);
-        setMatchSummary(generatedData);
+        // setMatchSummary(generatedData);
       } catch (error) {
         console.error("Error fetching match data:", error);
       }
@@ -111,7 +111,7 @@ return;
     matchData.homeTeam = {name:homeTeam??"",id:match?.homeTeamId??""};
     matchData.awayTeam = {name:awayTeam??"",id:match?.awayTeamId??""};
     matchData.Location= match.Location;
-    matchData.referee = match.referee??"";
+    matchData.referee = match.referee?.name??"";
     matchData.date = match.date??"";
     matchData.time = match.time??"";
     matchData.scoreA = teamStats.homeTeam?.goals || 0;
@@ -126,7 +126,7 @@ return;
     matchData.stats.fouls.awayTeam = teamStats.awayTeam?.fouls || 0;
     matchData.stats.cards.homeTeam = teamStats.homeTeam?.cards || 0;
     matchData.stats.cards.awayTeam = teamStats.awayTeam?.cards || 0;
-console.log("que cosa",matchData,match)
+// console.log("que cosa",matchData,match)
     return matchData;
   }
 
