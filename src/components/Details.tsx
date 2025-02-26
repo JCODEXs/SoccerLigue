@@ -2,29 +2,16 @@
 
 import React, { useEffect } from "react";
 import { useState } from "react";
-import type { Match } from "@/lib/types";
+import type { Match,Team,Location } from "@/lib/types";
 import { formatDateToLetters, validateMatchData } from "@/lib/utils";
 import { Calendar } from "./ui/calendar";
-import { findMatch, updateMatchInDatabase } from "@/app/actions/actions";
+import {  getTeamsAndLocations, updateMatchInDatabase } from "@/app/actions/actions";
 import { useRouter } from "next/navigation";
 
 interface DetailsProps {
   match: Match; 
 }
-const Locations = [
-  "Location A",
-  "Location B",
-  "Location C",
-  "Location D",
-  "Location E",
-];
-const Referees = [
-  "Referee A",
-  "Referee B",
-  "Referee C",
-  "Referee D",
-  "Referee E",
-];
+
 const times = [
   "10:00",
   "10:30",
@@ -49,12 +36,27 @@ export default function Details({match}:DetailsProps){
  
   
  const [location, setLocation] = useState<string>("");
-  const [referee,setReferee] = useState<string|null>(match?.referee);
+  const [referee,setReferee] = useState<Team|null>(match?.referee);
   const [isEditable, setIsEditable] = useState<boolean>(false);
     const [date, setDate] = useState<Date | undefined >(new Date());
   const [time, setTime] = useState<string>("10:50");
+  const [Referees, setReferees] = useState<Team[]|undefined>([]);
+    const [Locations, setLocations] = useState<Location[]|undefined>([]);
   const router = useRouter();
+  useEffect(()=>{
+     // Lista de equipos disponibles
+     async function dataFetch(){
  
+       const TeamsandLocations = await getTeamsAndLocations()
+       console.log("teams",TeamsandLocations)
+       const {Locations,Referees} = TeamsandLocations
+       if(TeamsandLocations){
+         setLocations(Locations)
+         setReferees(Referees)
+       }
+     }
+ void dataFetch()
+   },[])
 
  useEffect(() => {
   if (match) {
@@ -95,6 +97,7 @@ export default function Details({match}:DetailsProps){
     const updatedMatch = {
       ...match,
       location: location,
+      refereeId: referee?.id,
       referee: referee,
       date: date,
       time: time,
@@ -135,7 +138,7 @@ console.log("Is editable:", isEditable);
     <span className="font-bold text-primary">Location:</span> {match?.Location?.name}
   </p>
   <p className="text-lg ">
-    <span className="font-bold text-primary">Referee:</span> {match?.referee ?? "Not assigned"}
+    <span className="font-bold text-primary">Referee:</span> {match?.referee?.name ?? "Not assigned"}
   </p>
        <p className="text-lg xl:text-xl">
 {formatDateToLetters(match?.date)} at {match?.time}
@@ -168,8 +171,8 @@ console.log("Is editable:", isEditable);
                 value={location}
                 className=" p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400">
                   <option value={match?.Location.name}>{match?.Location.name}</option>
-                  {Locations.map((location)=>
-                  <option key={location} value={location}>{location}</option>)}
+                  {Locations?.map((location)=>
+                  <option key={location.id} value={location.id}>{location.name}</option>)}
                 </select>
             
               </div>
@@ -192,11 +195,14 @@ console.log("Is editable:", isEditable);
                   Referee
                 </label>
                 <select
-                onChange={(e)=>setReferee(e.target.value)}
-                value={referee??""} className=" p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400">
-                  <option value={match?.referee??""}>{match?.referee ?? "Not assigned"}</option>
-                  {Referees.map((referee)=>
-                  <option key={referee} value={referee}>{referee}</option>)}
+               onChange={(e) => {
+    const selectedReferee = Referees?.find(r => r.id === e.target.value);
+    setReferee(selectedReferee ?? null);
+  }}
+                value={referee?.id} className=" p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400">
+                  <option value={match?.referee?.id??""}>{match?.referee?.name ?? "Not assigned"}</option>
+                  {Referees?.map((referee)=>
+                  <option key={referee.id} value={referee.id}>{referee.name}</option>)}
                 </select>
              
               </div>

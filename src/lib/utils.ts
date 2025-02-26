@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import type { Team } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -19,8 +20,9 @@ export function validateMatchData(match: {
   homeTeamId: string | null;
   awayTeamId: string | null;
   locationId: string | null;
+  refereeId: string | undefined;
   date: Date | undefined;
-  referee: string | null;
+  referee: Team | null;
   time: string | null;
 }) {
   console.log(match);
@@ -32,6 +34,7 @@ export function validateMatchData(match: {
     homeTeamId: match.homeTeamId , // Ensured non-null
     awayTeamId: match.awayTeamId ,
     locationId: match.locationId ,
+    refereeId: match.refereeId ?? "No Referee Assigned", // Default if null
     date: match.date ,
     referee: match.referee ?? "No Referee Assigned", // Default if null
     time: match.time ,
