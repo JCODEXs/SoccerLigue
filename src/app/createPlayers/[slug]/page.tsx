@@ -1,9 +1,8 @@
-//add validations to the name position and number canot be empty and number must be a number if not corret return a message to the user
 "use client" 
 import React, { useState, use, useEffect } from 'react';
 import { findPlayersByTeam, findTeam } from '@/app/actions/actions'
 import {footballPositions} from '@/lib/utils'
-
+import { useSession } from "next-auth/react";
 
 const CreatePlayersPage= ({
     params,
@@ -14,7 +13,7 @@ const { slug:teamId } = use(params);
 console.log(teamId)
 
 
-    const [playersB, setPlayersB] = useState<{ name: string; position: string; number: number }[]>([]);
+const [playersB, setPlayersB] = useState<{ name: string; position: string; number: number }[]>([]);
     const [players, setPlayers] = useState<{ name: string; position: string; number: number }[]>([]);
     const [playerName, setPlayerName] = useState<string>('');
     const [playerPosition, setPlayerPosition] = useState<string>('');
@@ -70,6 +69,11 @@ console.log(teamId)
 };
 
 
+const { data: session } = useSession();
+
+if (!session) {
+  return <p>You must be logged in to view this page.</p>;
+}
     return (
         <div className=" bg-gray-800  p-2 m-2">
             <div className="flex flex-row justify-between items-center mb-4">
