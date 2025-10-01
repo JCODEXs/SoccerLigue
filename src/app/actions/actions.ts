@@ -2,7 +2,6 @@
 
 import type { Match, Team } from "@/lib/types";
 import { db } from "@/server/db";
-import { isAuthenticated } from "@/server/auth";
 
 export async function findMatch(id: string) {
   const match:Match|null = await db.match.findUnique({
@@ -53,9 +52,9 @@ export async function saveMatchToDatabase(match: {
   date: Date;
   refereeId: string;
   time: string;
-}, req: any) {
+}) {
   try {
-    await isAuthenticated(req);
+    
     const newMatch = await db.match.create({
       data: {
         homeTeamId: match.homeTeamId,
@@ -80,9 +79,9 @@ export async function updateMatchInDatabase(matchId: string, updatedMatch: {
   date: Date;
   refereeId: string;
   time: string;
-}, req: any) {
+}) {
   try {
-    await isAuthenticated(req);
+    
     const updatedMatchRecord = await db.match.update({
       where: { id: matchId },
       data: {
@@ -118,13 +117,13 @@ type MatchEvent = {
   awayTeam:string;
 };
 
-export async function saveMatchData({ matchData }: { matchData: MatchData }, req: any) {
+export async function saveMatchData({ matchData }: { matchData: MatchData }) {
   console.log("Saving match data: (server)", matchData);
 
   const { events, matchId, homeTeam, awayTeam }: MatchData = matchData;
 
   try {
-    await isAuthenticated(req);
+    
     if (!events || !matchId || !homeTeam || !awayTeam) {
       throw new Error("Missing required fields");
     }
@@ -209,9 +208,9 @@ export async function fetchPlayersByTeam  (teamName: string) {
     include: { players: true },
   });
 };
-export async function createRefereeAction(newreferee:string, req: any){
+export async function createRefereeAction(newreferee:string){
  try {
-    await isAuthenticated(req);
+    
     if (!newreferee || typeof newreferee !== "string") {
       throw new Error("Invalid referee name");
     }
@@ -227,9 +226,9 @@ export async function createRefereeAction(newreferee:string, req: any){
   return null;
 }
 }
-export async function createLocationAction(newLocation:string, req: any){
+export async function createLocationAction(newLocation:string){
  try {
-    await isAuthenticated(req);
+    console.log("Creating Location:", newLocation);
     if (!newLocation || typeof newLocation !== "string") {
       throw new Error("Invalid Location name");
     }
