@@ -96,3 +96,9 @@ export type Location ={
   id:string;
   name:string;
 }
+
+export interface SessionPayload {
+  sessionToken: string;
+  userId: string;
+  expires: Date;
+}
