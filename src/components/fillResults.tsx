@@ -218,7 +218,7 @@ if(playersa && playersb){
     if (!selectedPlayer) return;
 
     // Determine timestamp based on mode
-    let timestamp: string;
+    let timestamp: string
     if (mode === 'live') {
       // Live mode: check if match start time is set
       if (!firstHalfStartTime) {
@@ -227,7 +227,7 @@ if(playersa && playersb){
       }
       // Use current time and calculate match minute
       const now = new Date();
-      timestamp = now.toTimeString().split(' ')[0];
+      timestamp = now.toTimeString().split(' ')[0] || new Date().toISOString();
       // timestamp = calculateMatchMinute(currentTime);
     } else {
       // Past match mode: use manual time input

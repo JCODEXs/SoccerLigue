@@ -35,7 +35,7 @@ export type MatchEvent = {
   id: string;
   assistant: string | null;
   substitute: string | null;
-  timestamp: string;
+  timestamp: string
   matchId: string | null;
 };
 export type Team={
