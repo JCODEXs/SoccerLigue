@@ -42,7 +42,7 @@ export default function Details({match}:DetailsProps){
     const [date, setDate] = useState<Date | undefined >(new Date());
   const [time, setTime] = useState<string>("10:50");
   const [Referees, setReferees] = useState<Team[]|undefined>([]);
-    const [Locations, setLocations] = useState<Location[]|undefined>([]);
+    const [Locations, setLocations] = useState<location[]|undefined>([]);
   const router = useRouter();
   useEffect(()=>{
      // Lista de equipos disponibles
