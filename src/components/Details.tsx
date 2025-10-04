@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useState } from "react";
-import type { Match,Team,Location } from "@/lib/types";
+import type { Match,Team,location } from "@/lib/types";
 import { formatDateToLetters, validateMatchData } from "@/lib/utils";
 import { Calendar } from "./ui/calendar";
 import {  getTeamsAndLocations, updateMatchInDatabase } from "@/app/actions/actions";
