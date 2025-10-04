@@ -7,6 +7,7 @@ import { formatDateToLetters, validateMatchData } from "@/lib/utils";
 import { Calendar } from "./ui/calendar";
 import {  getTeamsAndLocations, updateMatchInDatabase } from "@/app/actions/actions";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface DetailsProps {
   match: Match; 
@@ -33,8 +34,8 @@ const times = [
 ];
 
 export default function Details({match}:DetailsProps){
- 
-  
+
+
  const [location, setLocation] = useState<string>("");
   const [referee,setReferee] = useState<Team|null>(match?.referee);
   const [isEditable, setIsEditable] = useState<boolean>(false);
@@ -115,7 +116,7 @@ export default function Details({match}:DetailsProps){
     const updatedMatchReq= await updateMatchInDatabase(match.id,validatedMatch);
 
     console.log("Updated Match:", updatedMatchReq);
-    alert("Match details updated successfully!");
+    toast("Match details updated successfully!");
  
     router.push("/matches");
   };
@@ -135,7 +136,7 @@ console.log("Is editable:", isEditable);
       </h1>
      <div className="flex flex-row justify-around flex-wrap gap-4 p-2 bg-gray-700 rounded-lg shadow-md mb-2">
   <p className="text-lg ">
-    <span className="font-bold text-primary">Location:</span> {match?.Location?.name}
+    <span className="font-bold text-primary">Location:</span> {match?.location?.name}
   </p>
   <p className="text-lg ">
     <span className="font-bold text-primary">Referee:</span> {match?.referee?.name ?? "Not assigned"}
@@ -170,7 +171,7 @@ console.log("Is editable:", isEditable);
                 onChange={(e)=>setLocation(e.target.value)}
                 value={location}
                 className=" p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400">
-                  <option value={match?.Location.name}>{match?.Location.name}</option>
+                  <option value={match?.location?.name}>{match?.location?.name}</option>
                   {Locations?.map((location)=>
                   <option key={location.id} value={location.id}>{location.name}</option>)}
                 </select>

@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input"; // Input de shadcn/ui
 import { Button } from "@/components/ui/button"; // Button de shadcn/ui
 // import { useMatchStore } from "@/app/stores/matchStore";
 import { getTeamsAndLocations, saveMatchToDatabase } from "@/app/actions/actions"; 
-import type { Location, Team } from "@/lib/types";
+import type { location, Team } from "@/lib/types";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 
 
@@ -21,7 +22,7 @@ const ProgramMatch: React.FC = () => {
   const [referee, setReferee] = useState<Team | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [Referees, setReferees] = useState<Team[]|undefined>([]);
-  const [Locations, setLocations] = useState<Location[]|undefined>([]);
+  const [Locations, setLocations] = useState<location[]|undefined>([]);
  const router = useRouter(); 
   // Zustand store para manejar el estado local
   // const { addMatch } = useMatchStore();
@@ -32,7 +33,7 @@ const ProgramMatch: React.FC = () => {
 
     // Validar que todos los campos estén llenos
     if (!homeTeamId || !awayTeamId || !date || !time || !location) {
-      alert("Please fill in all fields.");
+      toast("Please fill in all fields.");
       return;
     }
 
@@ -53,14 +54,14 @@ const ProgramMatch: React.FC = () => {
       if (response.success) {
         // Agregar el partido al estado local usando Zustand
         // addMatch(match);
-        alert("Match scheduled successfully!");
+        toast("Match scheduled successfully!");
          router.push("/matches");
       } else {
-        alert("Failed to schedule match. Please try again.");
+        toast("Failed to schedule match. Please try again.");
       }
     } catch (error) {
       console.error("Error scheduling match:", error);
-      alert("An error occurred. Please try again.");
+      toast("An error occurred. Please try again.");
     }
   };
 

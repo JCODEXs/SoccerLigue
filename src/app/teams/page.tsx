@@ -119,7 +119,7 @@ const reassignPlayer = async (playerId: string, newTeamId: string) => {
         </div>
      {/* <label className="text-md mt-3">Players:</label> */}
 
-{team.players.length > 0 ? (
+{team?.players?.length > 0 ? (
   <table className="min-w-full border-collapse border shadow-md rounded-full">
     <caption className="caption-top text-gray-400">Players List
 

@@ -1,17 +1,14 @@
-import { PrismaClient } from "@prisma/client";
-import { withAccelerate } from "@prisma/extension-accelerate";
-import { env } from "@/env";
+import { PrismaClient } from '@prisma/client'
 
-const createPrismaClient = () =>
-  new PrismaClient({
-    log:
-      env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
-  }).$extends(withAccelerate());
-
+// Simple global instance pattern
 const globalForPrisma = globalThis as unknown as {
-  prisma: ReturnType<typeof createPrismaClient> | undefined;
-};
+  prisma: PrismaClient
+}
 
-export const db = globalForPrisma.prisma ?? createPrismaClient();
+// Create or reuse the Prisma instance
+export const db = globalForPrisma.prisma || new PrismaClient()
 
-if (env.NODE_ENV !== "production") globalForPrisma.prisma = db;
+// In development, attach to global to prevent hot-reload issues
+if (process.env.NODE_ENV === 'development') {
+  globalForPrisma.prisma = db
+}

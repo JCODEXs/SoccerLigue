@@ -73,7 +73,7 @@ model Match {
   events     Event[]
   homeTeam   Team?     @relation(name: "HomeMatches", fields: [homeTeamId], references: [id], onDelete: SetNull)
   awayTeam   Team?     @relation(name: "AwayMatches", fields: [awayTeamId], references: [id], onDelete: SetNull)
-  Location   Location @relation(fields: [locationId], references: [id])
+  location   Location @relation(fields: [locationId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }

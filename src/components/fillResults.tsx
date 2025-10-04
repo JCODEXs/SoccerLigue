@@ -3,38 +3,145 @@ import { fetchPlayersByTeam, saveMatchData } from "@/app/actions/actions";
 import React, { useEffect, useState } from "react";
 import type { Event, Player, SavedMatchData, Match } from "@/lib/types";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 
-const FillResults: React.FC<{ match: Match }> = ({ match }) => {
+const FillResults: React.FC<{ match: Match; mode: 'live' | 'past' }> = ({ match, mode }) => {
   console.log(match)
-  const { homeTeamId, awayTeamId, homeTeam, awayTeam,id,date,locationId } = match;
+  const { homeTeamId, awayTeamId, homeTeam, awayTeam,id,date,locationId, events: existingEvents } = match;
   const [selectedTeam, setSelectedTeam] = useState<string>(homeTeam?.name ?? "");
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [card, setCard] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<string>("goal");
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<Event[]>([]); // All events (existing + new)
+  const [newEvents, setNewEvents] = useState<Event[]>([]); // Only new events to save
+  const [manualTime, setManualTime] = useState<string>(''); // For past match mode
+  const [hasExistingEvents, setHasExistingEvents] = useState<boolean>(false);
+  const [existingEventsCount, setExistingEventsCount] = useState<number>(0);
+
+  // Match start time tracking for live mode
+  const [firstHalfStartTime, setFirstHalfStartTime] = useState<Date | null>(null);
+  const [secondHalfStartTime, setSecondHalfStartTime] = useState<Date | null>(null);
+  const [showTimeAdjustment, setShowTimeAdjustment] = useState<boolean>(false);
+
   // const [playersA, setPlayersA] = useState<[]>([]);
   // const [playersB, setPlayersB] = useState<[]>([]);
-  const [isGoalFromEvent, setIsGoalFromEvent] = useState<boolean>(false); 
-  const [goalScorer, setGoalScorer] = useState<string >(""); // 
+  const [isGoalFromEvent, setIsGoalFromEvent] = useState<boolean>(false);
+  const [goalScorer, setGoalScorer] = useState<string >(""); //
   const [goalAssistant, setGoalAssistant] = useState<string| null >(null);
-  const [availablePlayersA, setAvailablePlayersA] = useState<Player[]>([]); 
-  const [availablePlayersB, setAvailablePlayersB] = useState<Player[]|[]>([]); 
-  const [substitutePlayersA, setSubstitutePlayersA] = useState<Player[]|[]>([]); 
-  const [substitutePlayersB, setSubstitutePlayersB] = useState<Player[]|[]>([]); 
-  const [substitutePlayer, setSubstitutePlayer] = useState<string | null>(null); 
+  const [availablePlayersA, setAvailablePlayersA] = useState<Player[]>([]);
+  const [availablePlayersB, setAvailablePlayersB] = useState<Player[]|[]>([]);
+  const [substitutePlayersA, setSubstitutePlayersA] = useState<Player[]|[]>([]);
+  const [substitutePlayersB, setSubstitutePlayersB] = useState<Player[]|[]>([]);
+  const [substitutePlayer, setSubstitutePlayer] = useState<string | null>(null);
   const router=useRouter();
+
+  // Helper function to convert any timestamp format to match minute
+  // This function uses current state values, so it will recalculate when state changes
+  const convertToMatchMinute = React.useCallback((timestamp: string): string => {
+    if (timestamp.includes("'")) {
+      return timestamp; // Already in match minute format
+    }
+  
+    const matchStartTime = firstHalfStartTime || (match.date ? new Date(match.date) : null);
+    if (!matchStartTime) {
+      return timestamp;
+    }
+  
+    try {
+      let eventTime: Date;
+  
+      // Handle clock time (HH:MM:SS)
+      if (timestamp.includes(':') && !timestamp.includes("'")) {
+        const timeParts = timestamp.split(':');
+        if (timeParts.length >= 2 && timeParts[0] && timeParts[1]) {
+          // Use the match date but with the event time
+          const matchDateStr = matchStartTime.toISOString().split('T')[0];
+          const timeStr = timestamp.padStart(8, '0').substring(0, 8); // Ensure HH:MM:SS format
+          const eventDateTime = `${matchDateStr}T${timeStr}`;
+          eventTime = new Date(eventDateTime);
+          
+          console.log('Time conversion:', {
+            matchDateStr,
+            timeStr,
+            eventDateTime,
+            eventTime: eventTime?.toISOString()
+          });
+  
+          if (isNaN(eventTime.getTime())) {
+            console.warn('Invalid event time:', timestamp);
+            return timestamp;
+          }
+        } else {
+          return timestamp;
+        }
+      }
+      // Handle other formats (fallback)
+      else {
+        return timestamp;
+      }
+  
+      // Calculate difference
+      const diffMs = eventTime.getTime() - matchStartTime.getTime();
+      const matchMinute = Math.floor(diffMs / 60000);
+  
+      console.log('Time difference calculation:', {
+        matchStart: matchStartTime.toISOString(),
+        eventTime: eventTime.toISOString(),
+        diffMs,
+        matchMinute,
+        diffHours: (diffMs / 3600000).toFixed(2)
+      });
+  
+      if (matchMinute < 0) {
+        console.warn('Event before match start:', matchMinute);
+        return `PRE${Math.abs(matchMinute)}'`;
+      }
+  
+      // Your existing half-time logic here...
+      if (secondHalfStartTime && eventTime >= secondHalfStartTime) {
+        const secondHalfDiffMs = eventTime.getTime() - secondHalfStartTime.getTime();
+        const secondHalfMinute = Math.floor(secondHalfDiffMs / 60000);
+        
+        const firstHalfDurationMs = secondHalfStartTime.getTime() - matchStartTime.getTime();
+        const firstHalfMinutes = Math.floor(firstHalfDurationMs / 60000);
+        
+        const totalMinute = firstHalfMinutes + secondHalfMinute;
+  
+        if (secondHalfMinute > 45) {
+          const injuryTime = secondHalfMinute - 45;
+          return `90+${injuryTime}'`;
+        }
+        
+        return `${totalMinute}'`;
+      }
+      else if (matchMinute > 45) {
+        const injuryTime = matchMinute - 45;
+        return `45+${injuryTime}'`;
+      }
+  
+      return `${matchMinute}'`;
+  
+    } catch (error) {
+      console.error("Conversion error:", error, "Timestamp:", timestamp);
+      return timestamp;
+    }
+  }, [firstHalfStartTime, secondHalfStartTime, match.date]); // Re-create when these change
+
+  // Wrapper for backward compatibility
+  const calculateMatchMinute = convertToMatchMinute;
+
   // custom functions
 const handleSave = async () => {
   try {
     if (!id || !homeTeam?.name || !awayTeam?.name || !events?.length) {
       console.error("Missing required match data", { id, homeTeam, awayTeam, events });
-      alert("Error: Missing required match data.");
+      toast("Error: Missing required match data.");
       return;
     }
 
     const matchData: SavedMatchData = {
-      events,
+      events: newEvents,
       matchId: id,
       homeTeam: homeTeam.name,
       awayTeam: awayTeam.name,
@@ -45,15 +152,15 @@ const handleSave = async () => {
     const response = await saveMatchData({ matchData });
 
     if (response?.success) {
-      alert("Match saved successfully!");
+      toast("Match saved successfully!");
        router.push("/view-results"+`/${id}`);
     } else {
       console.error("Error saving match:", response);
-      alert(`Error saving match: ${response?.message ?? "Unknown error"}`);
+      toast(`Error saving match: ${response?.message ?? "Unknown error"}`);
     }
   } catch (error) {
     console.error("Unexpected error saving match:", error);
-    alert("An unexpected error occurred while saving the match.");
+    toast("An unexpected error occurred while saving the match.");
   }
 };
 
@@ -73,19 +180,63 @@ if(playersa && playersb){
   };
   
 
+  // Load existing events if they exist
+  useEffect(() => {
+    if (existingEvents && existingEvents.length > 0 && !hasExistingEvents) {
+      console.log("Loading existing events:", existingEvents);
+      // Convert existing events to the Event format
+      // Note: We store original timestamps, conversion happens on display
+      const formattedEvents: Event[] = existingEvents
+        .filter((event) => event.team) // Only include events with a team
+        .map((event) => ({
+          type: event.type,
+          team: event.team!,
+          player: event.player,
+          assistant: event.assistant ?? undefined,
+          card: event.card ?? undefined,
+          substitute: event.substitute ?? undefined,
+          timestamp: event.timestamp, // Keep original timestamp for conversion on display
+        }));
+      setEvents(formattedEvents);
+      setExistingEventsCount(formattedEvents.length); // Track how many events already exist
+      setHasExistingEvents(true);
+      toast.success(`Loaded ${formattedEvents.length} existing event${formattedEvents.length > 1 ? 's' : ''}`);
+    }
+  }, [existingEvents, hasExistingEvents]);
+
   useEffect(() => {
     void getPlayersData();
   }, []);
+
   useEffect(() => {
     if (selectedEvent != "goal" && selectedEvent!="penalty") {
   setGoalAssistant(selectedPlayer);}
-}, [selectedPlayer,selectedEvent]); 
+}, [selectedPlayer,selectedEvent]);
 
 
   const handleAddEvent = () => {
     if (!selectedPlayer) return;
 
-    const timestamp = new Date().toLocaleTimeString();
+    // Determine timestamp based on mode
+    let timestamp: string;
+    if (mode === 'live') {
+      // Live mode: check if match start time is set
+      if (!firstHalfStartTime) {
+        toast.error("Please set the match start time first");
+        return;
+      }
+      // Use current time and calculate match minute
+      const now = new Date();
+      timestamp = now.toTimeString().split(' ')[0];
+      // timestamp = calculateMatchMinute(currentTime);
+    } else {
+      // Past match mode: use manual time input
+      if (!manualTime.trim()) {
+        toast.error("Please enter the match minute for this event");
+        return;
+      }
+      timestamp = manualTime;
+    }
 
     // Add the corner/free kick event
     const newEvent: Event = {
@@ -109,18 +260,27 @@ if(playersa && playersb){
       };
       console.log("events",newEvent,goalEvent)
       setEvents([...events, newEvent, goalEvent]);
+      setNewEvents([...newEvents, newEvent, goalEvent]); // Track new events separately
     } else {
       setEvents([...events, newEvent]);
+      setNewEvents([...newEvents, newEvent]); // Track new events separately
     }
 updateAvailablePlayers(newEvent);
     // Reset states
     setIsGoalFromEvent(false);
     setGoalScorer("");
+    setManualTime(""); // Reset manual time
     // setCard(null);
     // setSelectedEvent("");
     // setSelectedTeam("");
     setSelectedPlayer(null);
     setGoalAssistant("");
+  };
+
+  const handleRemoveEvent = (index: number) => {
+    const updatedEvents = events.filter((_, i) => i !== index);
+    setEvents(updatedEvents);
+    toast.success("Event removed");
   };
 const updateAvailablePlayers = (event: Event) => {
   const { type, player, team, card, substitute } = event;
@@ -196,16 +356,170 @@ const updateAvailablePlayers = (event: Event) => {
 
   return (
     <div className="p-1">
-     
+
       <div className="p-1 bg-gray-800 rounded-lg shadow-md w-full max-w-2xl mx-auto text-white">
+        {/* Existing Events Indicator */}
+        {hasExistingEvents && (
+          <div className="mb-4 p-4 bg-blue-900/30 border border-blue-600 rounded-lg">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">📋</span>
+              <div>
+                <p className="text-blue-300 font-semibold">Existing Events Loaded</p>
+                <p className="text-blue-400 text-sm">
+                  This match already has {events.length} event{events.length > 1 ? 's' : ''}. You can add more or save to update.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Match Time Adjustment - Only for Live Mode */}
+        {mode === 'live' && (
+          <div className="mb-4 p-4 bg-teal-900/30 border border-teal-600 rounded-lg">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">⏱️</span>
+                <h3 className="text-teal-300 font-semibold">Match Time Settings</h3>
+              </div>
+              <button
+                onClick={() => setShowTimeAdjustment(!showTimeAdjustment)}
+                className="text-sm text-teal-400 hover:text-teal-300 transition-colors"
+              >
+                {showTimeAdjustment ? '▼ Hide' : '▶ Show'}
+              </button>
+            </div>
+
+            {showTimeAdjustment && (
+              <div className="space-y-4 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* First Half Start Time */}
+                  <div>
+                    <label className="block text-sm font-semibold text-teal-300 mb-2">
+                      First Half Start Time {!firstHalfStartTime && <span className="text-red-400">*</span>}
+                    </label>
+                    <div className="flex gap-2">
+                    <input
+  type="time"
+  step="1"
+  value={firstHalfStartTime ? firstHalfStartTime.toTimeString().slice(0, 8) : ''}
+  onChange={(e) => {
+    if (e.target.value) {
+      const [hours, minutes, seconds] = e.target.value.split(':');
+      
+      // Create a new date using the match date (if available) or today's date
+      const baseDate = match.date ? new Date(match.date) : new Date();
+      
+      const newTime = new Date(baseDate);
+      newTime.setHours(parseInt(hours ?? '0'));
+      newTime.setMinutes(parseInt(minutes ?? '0'));
+      newTime.setSeconds(parseInt(seconds ?? '0'));
+      
+      console.log('Setting first half start time:', {
+        inputValue: e.target.value,
+        baseDate: baseDate.toISOString(),
+        newTime: newTime.toISOString(),
+        localTime: newTime.toLocaleString()
+      });
+      
+      setFirstHalfStartTime(newTime);
+    }
+  }}
+  className="flex-1 px-3 py-2 bg-gray-700 border border-teal-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+/>
+                      <button
+                        onClick={() => setFirstHalfStartTime(new Date())}
+                        className="px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm transition-colors"
+                      >
+                        Now
+                      </button>
+                    </div>
+                    {firstHalfStartTime && (
+                      <p className="text-xs text-teal-400 mt-1">
+                        Set to: {firstHalfStartTime.toLocaleTimeString()}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Second Half Start Time */}
+                  <div>
+                    <label className="block text-sm font-semibold text-teal-300 mb-2">
+                      Second Half Start Time (Optional)
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="time"
+                        step="1"
+                        value={secondHalfStartTime ? secondHalfStartTime.toTimeString().slice(0, 8) : ''}
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            const [hours, minutes, seconds] = e.target.value.split(':');
+                            const newTime = new Date();
+                            newTime.setHours(parseInt(hours ?? '0'));
+                            newTime.setMinutes(parseInt(minutes ?? '0'));
+                            newTime.setSeconds(parseInt(seconds ?? '0'));
+                            setSecondHalfStartTime(newTime);
+                          }
+                        }}
+                        className="flex-1 px-3 py-2 bg-gray-700 border border-teal-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      />
+                      <button
+                        onClick={() => setSecondHalfStartTime(new Date())}
+                        className="px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm transition-colors"
+                      >
+                        Now
+                      </button>
+                    </div>
+                    {secondHalfStartTime && (
+                      <p className="text-xs text-teal-400 mt-1">
+                        Set to: {secondHalfStartTime.toLocaleTimeString()}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="p-3 bg-teal-950/50 rounded-lg">
+                  <p className="text-xs text-teal-300">
+                    💡 <strong>Tip:</strong> Set the first half start time when the match begins.
+                    Set the second half start time when the second half begins for accurate minute calculation.
+                    Events will be recorded as match minutes (e.g., 23', 45+2', 67').
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Reference Time Indicator */}
+            {!showTimeAdjustment && (
+              <div className="mt-3 p-2 bg-teal-950/30 rounded-lg">
+                <p className="text-xs text-teal-400">
+                  {firstHalfStartTime ? (
+                    <>
+                      ✓ Using adjusted start time: <strong>{firstHalfStartTime.toLocaleTimeString()}</strong>
+                      {secondHalfStartTime && (
+                        <> | Second half: <strong>{secondHalfStartTime.toLocaleTimeString()}</strong></>
+                      )}
+                    </>
+                  ) : match.date ? (
+                    <>
+                      ℹ️ Using planned match time: <strong>{new Date(match.date).toLocaleTimeString()}</strong>
+                      <span className="text-yellow-400"> (Set adjusted time for accuracy)</span>
+                    </>
+                  ) : (
+                    <span className="text-red-400">⚠️ No reference time available</span>
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="flex flex-row justify-between">
-          <h2 className="text-xl font-bold text-orange-500 flex-grow-1 w-1/2 p-2">Manage Match Events</h2>  
+          <h2 className="text-xl font-bold text-orange-500 flex-grow-1 w-1/2 p-2">Manage Match Events</h2>
            <button
-            className="m-2 bg-teal-600 text-white text-lg p-2 rounded border-teal-700 disabled:bg-gray-400 disabled:cursor-not-allowed "
+            className="m-2 bg-teal-600 text-white text-lg p-2 rounded border-teal-700 disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-teal-700 transition-colors"
             onClick={handleSave}
             disabled={events.length === 0}
           >
-            Save match
+            {hasExistingEvents ? 'Update Match' : 'Save Match'}
           </button>
         </div>
         {/* Team Selection */}
@@ -409,9 +723,39 @@ const updateAvailablePlayers = (event: Event) => {
 
           </>
         )}
+
+        {/* Manual Time Input - Only for Past Match Mode */}
+        {mode === 'past' && (
+          <div className="mt-4 p-4 bg-orange-900/20 border border-orange-600 rounded-lg">
+            <label className="block font-semibold text-orange-300 mb-2">
+              Match Minute <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="text"
+              value={manualTime}
+              onChange={(e) => setManualTime(e.target.value)}
+              placeholder="e.g., 23', 45+2', 67'"
+              className="border p-3 rounded w-full bg-gray-700 border-orange-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            <p className="text-xs text-orange-300 mt-2">
+              💡 Enter the minute when this event occurred (e.g., 23' for 23rd minute, 45+2' for injury time)
+            </p>
+          </div>
+        )}
+
+        {/* Live Mode Indicator */}
+        {mode === 'live' && (
+          <div className="mt-4 p-3 bg-teal-900/20 border border-teal-600 rounded-lg flex items-center gap-2">
+            <span className="text-2xl animate-pulse">🔴</span>
+            <p className="text-sm text-teal-300">
+              <span className="font-semibold">Live Mode:</span> Events will be timestamped automatically
+            </p>
+          </div>
+        )}
+
         {/* Add Event Button */}
         <button
-          className="mt-3 bg-teal-700 text-white py-2 my-2 rounded w-full"
+          className="mt-3 bg-teal-700 text-white py-2 my-2 rounded w-full hover:bg-teal-600 transition-colors font-semibold"
           onClick={handleAddEvent}
         >
           Add Event
@@ -420,34 +764,73 @@ const updateAvailablePlayers = (event: Event) => {
       <div className="flex flex-col justify-center items-center">
         
         {/* Events List */}
-        <div className="mt-3   rounded-lg shadow-lg  w-full">
-          <h3 className="text-xl font-bold text-teal-900 text-center bg-orange-300">Match Events</h3>
+        <div className="mt-3 rounded-lg shadow-lg w-full">
+          <h3 className="text-xl font-bold text-teal-900 text-center bg-orange-300 py-2 rounded-t-lg">
+            Match Events ({events.length})
+          </h3>
           {events.length === 0 ? (
-            <p className="text-gray-400 italic mt-2">No events added yet.</p>
+            <div className="text-center py-8 bg-gray-800 rounded-b-lg">
+              <p className="text-4xl mb-3">📝</p>
+              <p className="text-gray-400 italic">No events added yet.</p>
+            </div>
           ) : (
             <ul className="mt-1 space-y-2">
-              {events.map((event, index) => (
-                <li
-                  key={index}
-                  className="grid grid-cols-4 bg-gray-800  items-center rounded-md shadow transition hover:bg-gray-900"
-                >
-                  <div className="flex flex-col items-center justify-end">
-                    <span className="text-red-400 font-bold ">{event.type}</span>
-                    {event.assistant && event.type==="goal" && (
-                      <span className="text-gray-400 italic text-sm">(Assist: {event.assistant})</span>
-                    )}
-                    {event.card && event.type==="faul" &&(
-                      <span className="text-gray-400 italic text-sm">( {event.card})</span>
-                    )}
-                  </div>
-                  <div className="flex flex-col items-center justify-end">
-                     <span className="text-blue-400 font-sm">{event.player}</span>
-                  {event.type==="substitution" && <span className="text-teal-600 font-sm">{event.substitute}</span>}
+              {events.map((event, index) => {
+                // Convert timestamp to match minute for display
+                const displayTime = convertToMatchMinute(event.timestamp);
+
+                // Debug log
+                if (index === 0) {
+                  console.log('Time conversion:', {
+                    original: event.timestamp,
+                    converted: displayTime,
+                    firstHalfStart: firstHalfStartTime?.toLocaleTimeString(),
+                    secondHalfStart: secondHalfStartTime?.toLocaleTimeString(),
+                    matchDate: match.date
+                  });
+                }
+
+                return (
+                  <li
+                    key={index}
+                    className="grid grid-cols-5 bg-gray-800 items-center rounded-md shadow transition hover:bg-gray-900 p-2"
+                  >
+                    <div className="flex flex-col items-center justify-center">
+                      <span className="text-red-400 font-bold text-sm">{event.type}</span>
+                      {event.assistant && event.type==="goal" && (
+                        <span className="text-gray-400 italic text-xs">(Assist: {event.assistant})</span>
+                      )}
+                      {event.card && event.type==="faul" &&(
+                        <span className="text-gray-400 italic text-xs">({event.card})</span>
+                      )}
                     </div>
-                  <span className="text-gray-300 font-sm">{event.team}</span>
-                      <span className="font-semibold text-teal-600">{event.timestamp}</span>
-                </li>
-              ))}
+                    <div className="flex flex-col items-center justify-center">
+                      <span className="text-blue-400 text-sm">{event.player}</span>
+                      {event.type==="substitution" && (
+                        <span className="text-teal-600 text-xs">→ {event.substitute}</span>
+                      )}
+                    </div>
+                    <span className="text-gray-300 text-sm text-center">{event.team}</span>
+                    <div className="flex flex-col items-center justify-center">
+                      <span className="font-semibold text-teal-600 text-lg text-center">{displayTime}</span>
+                      {event.timestamp !== displayTime && (
+                        <span className="text-xs text-gray-500" title={`Original: ${event.timestamp}`}>
+                          {/* (converted) */}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex justify-center">
+                      <button
+                        onClick={() => handleRemoveEvent(index)}
+                        className="text-red-400 hover:text-red-300 hover:bg-red-900/30 rounded-full w-8 h-8 flex items-center justify-center font-bold text-xl transition-colors"
+                        title="Remove event"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

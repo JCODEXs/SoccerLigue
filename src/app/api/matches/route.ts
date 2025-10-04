@@ -18,7 +18,13 @@ export async function GET(req: Request) {
         id: true,
       },
     },
-    Location: {
+    referee: {
+      select: {
+        name: true, // Include the name of the referee team
+        id: true,
+      },
+    },
+    location: {
       select: {
         name: true, // Include location name if needed
         id:true,

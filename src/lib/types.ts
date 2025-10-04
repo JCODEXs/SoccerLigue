@@ -60,7 +60,7 @@ export type Match = {
   awayTeam: Team | null;
   createdAt: Date;
   updatedAt: Date;
-  Location:Team;
+  location:Team;
 
 };
 
@@ -92,7 +92,7 @@ export type Player = {
   createdAt: Date;
 };
 
-export type Location ={
+export type location ={
   id:string;
   name:string;
 }

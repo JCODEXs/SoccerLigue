@@ -1,5 +1,7 @@
-import { db } from "@/server/db";
+// import { db } from "@/server/db";
+export const runtime = 'nodejs'
 import { NextResponse } from "next/server";
+import { db } from "@/server/db";
 
 interface TeamRequest {
   name: string;
@@ -12,10 +14,11 @@ interface PlayerRequest {
   position: string;
   number: number;
 }
-
 export async function GET() {
   try {
-    const teams = await db.team.findMany({ include: { players: true } });
+    console.log('DB instance ss2:', db?.constructor.name)
+    console.log('DB team method exists:', typeof db.team?.findMany)
+    const teams = await db.team.findMany();
     return NextResponse.json({ success: true, teams });
   } catch (error) {
     console.error("Error fetching teams:", (error as Error).stack ?? error);

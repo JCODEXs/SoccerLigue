@@ -20,7 +20,7 @@ export async function findMatch(id: string) {
         ,id:true,
         }
       },
-      Location:true,
+      location:true,
       referee:true
       
     },

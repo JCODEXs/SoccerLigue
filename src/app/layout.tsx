@@ -4,6 +4,7 @@ import { type Metadata } from "next";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import Header from "@/components/header"; // Import the new client-side Header
+import { Toaster } from "@/components/ui/sonner"
 
 export const metadata: Metadata = {
   title: "Soccer League",
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </footer>
+        <Toaster />
       </body>
     </html>
   );
