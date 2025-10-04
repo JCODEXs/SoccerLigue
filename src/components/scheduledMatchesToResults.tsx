@@ -123,7 +123,7 @@ console.log("match",data)
               <div className="flex justify-between gap-2 items-center md:flex-row">
               <div className="text-sm text-gray-300 ">
                 {/* Location:  */}
-                {match?.Location?.name}
+                {match?.location?.name}
               </div>
               <div className="text-sm text-gray-300  ">
                 Referee: {""}
