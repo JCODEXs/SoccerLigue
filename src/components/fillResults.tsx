@@ -227,7 +227,7 @@ if(playersa && playersb){
       }
       // Use current time and calculate match minute
       const now = new Date();
-      timestamp = now.toTimeString().split(' ')[0] || new Date().toISOString();
+      timestamp = now.toTimeString().split(' ')[0] ?? new Date().toISOString();
       // timestamp = calculateMatchMinute(currentTime);
     } else {
       // Past match mode: use manual time input
