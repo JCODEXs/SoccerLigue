@@ -43,7 +43,7 @@ const FillResults: React.FC<{ match: Match; mode: 'live' | 'past' }> = ({ match,
       return timestamp; // Already in match minute format
     }
   
-    const matchStartTime = firstHalfStartTime || (match.date ? new Date(match.date) : null);
+    const matchStartTime = firstHalfStartTime ?? (match.date ? new Date(match.date) : null);
     if (!matchStartTime) {
       return timestamp;
     }
@@ -481,7 +481,7 @@ const updateAvailablePlayers = (event: Event) => {
                   <p className="text-xs text-teal-300">
                     💡 <strong>Tip:</strong> Set the first half start time when the match begins.
                     Set the second half start time when the second half begins for accurate minute calculation.
-                    Events will be recorded as match minutes (e.g., 23', 45+2', 67').
+                    Events will be recorded as match minutes (e.g., 23, 45+2, 67).
                   </p>
                 </div>
               </div>
@@ -636,7 +636,7 @@ const updateAvailablePlayers = (event: Event) => {
               <label className="block font-semibold">Goal Scorer</label>
               <select
                 className="border p-2 rounded w-full bg-gray-600 border-teal-800"
-                value={goalScorer || ""}
+                value={goalScorer ?? ""}
                 onChange={(e) => setGoalScorer(e.target.value)}
               >
                 <option value="" disabled>Select a goal scorer</option>
@@ -681,7 +681,7 @@ const updateAvailablePlayers = (event: Event) => {
               <label className="block font-semibold">Goal Scorer</label>
               <select
                 className="border p-2 rounded w-full bg-gray-600 border-teal-800"
-                value={goalScorer || ""}
+                value={goalScorer ?? ""}
                 onChange={(e) => setGoalScorer(e.target.value)}
               >
                 <option value="" disabled>Select a goal scorer</option>
@@ -734,11 +734,11 @@ const updateAvailablePlayers = (event: Event) => {
               type="text"
               value={manualTime}
               onChange={(e) => setManualTime(e.target.value)}
-              placeholder="e.g., 23', 45+2', 67'"
+              placeholder="e.g., 23, 45+2, 67"
               className="border p-3 rounded w-full bg-gray-700 border-orange-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             <p className="text-xs text-orange-300 mt-2">
-              💡 Enter the minute when this event occurred (e.g., 23' for 23rd minute, 45+2' for injury time)
+              💡 Enter the minute when this event occurred (e.g., 23 for 23rd minute, 45+2 for injury time)
             </p>
           </div>
         )}
