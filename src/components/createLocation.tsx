@@ -26,7 +26,7 @@ export default function CreateLocationPage() {
         setSuccessMessage("Location successfully created!");
         setLocationName("");
       } else {
-        setErrorMessage("Error creating team.");
+        setErrorMessage("Error creating Location.");
       }
     } catch (error) {
       console.error("Error:", error);

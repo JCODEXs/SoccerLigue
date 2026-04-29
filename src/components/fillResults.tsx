@@ -7,9 +7,9 @@ import { toast } from "sonner";
 
 
 const FillResults: React.FC<{ match: Match; mode: 'live' | 'past' }> = ({ match, mode }) => {
-  console.log(match)
   const { homeTeamId, awayTeamId, homeTeam, awayTeam,id,date,locationId, events: existingEvents } = match;
   const [selectedTeam, setSelectedTeam] = useState<string>(homeTeam?.name ?? "");
+  const [otherTeam,setOtherTeam]=useState<string>("");
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [card, setCard] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<string>("goal");
@@ -18,6 +18,7 @@ const FillResults: React.FC<{ match: Match; mode: 'live' | 'past' }> = ({ match,
   const [manualTime, setManualTime] = useState<string>(''); // For past match mode
   const [hasExistingEvents, setHasExistingEvents] = useState<boolean>(false);
   const [existingEventsCount, setExistingEventsCount] = useState<number>(0);
+  console.log(otherTeam,"otherteam")
 
   // Match start time tracking for live mode
   const [firstHalfStartTime, setFirstHalfStartTime] = useState<Date | null>(null);
@@ -35,6 +36,24 @@ const FillResults: React.FC<{ match: Match; mode: 'live' | 'past' }> = ({ match,
   const [substitutePlayersB, setSubstitutePlayersB] = useState<Player[]|[]>([]);
   const [substitutePlayer, setSubstitutePlayer] = useState<string | null>(null);
   const router=useRouter();
+
+const makeOtherTeam = (team: string): string => {
+  // Early returns for invalid inputs
+  if (!team?.trim()) return '';
+  if (!homeTeam?.name && !awayTeam?.name) return '';
+  
+  const trimmedTeam = team.trim();
+  const homeName = homeTeam?.name || '';
+  const awayName = awayTeam?.name || '';
+  // console.log("teams other",homeName,homeTeam,awayName,trimmedTeam)
+  
+  // If one team is missing, return the other if it matches
+  if (homeName && trimmedTeam === homeName) return awayName;
+  if (awayName && trimmedTeam === awayName) return homeName;
+  
+  // Default fallback
+  return awayName || homeName || '';
+};
 
   // Helper function to convert any timestamp format to match minute
   // This function uses current state values, so it will recalculate when state changes
@@ -61,15 +80,15 @@ const FillResults: React.FC<{ match: Match; mode: 'live' | 'past' }> = ({ match,
           const eventDateTime = `${matchDateStr}T${timeStr}`;
           eventTime = new Date(eventDateTime);
           
-          console.log('Time conversion:', {
-            matchDateStr,
-            timeStr,
-            eventDateTime,
-            eventTime: eventTime?.toISOString()
-          });
+          // console.log('Time conversion:', {
+          //   matchDateStr,
+          //   timeStr,
+          //   eventDateTime,
+          //   eventTime: eventTime?.toISOString()
+          // });
   
           if (isNaN(eventTime.getTime())) {
-            console.warn('Invalid event time:', timestamp);
+            // console.warn('Invalid event time:', timestamp);
             return timestamp;
           }
         } else {
@@ -85,13 +104,13 @@ const FillResults: React.FC<{ match: Match; mode: 'live' | 'past' }> = ({ match,
       const diffMs = eventTime.getTime() - matchStartTime.getTime();
       const matchMinute = Math.floor(diffMs / 60000);
   
-      console.log('Time difference calculation:', {
-        matchStart: matchStartTime.toISOString(),
-        eventTime: eventTime.toISOString(),
-        diffMs,
-        matchMinute,
-        diffHours: (diffMs / 3600000).toFixed(2)
-      });
+      // console.log('Time difference calculation:', {
+      //   matchStart: matchStartTime.toISOString(),
+      //   eventTime: eventTime.toISOString(),
+      //   diffMs,
+      //   matchMinute,
+      //   diffHours: (diffMs / 3600000).toFixed(2)
+      // });
   
       if (matchMinute < 0) {
         console.warn('Event before match start:', matchMinute);
@@ -241,7 +260,7 @@ if(playersa && playersb){
     // Add the corner/free kick event
     const newEvent: Event = {
       type: selectedEvent,
-      team: selectedTeam,
+      team:selectedTeam,
       player: selectedPlayer,
       assistant: goalAssistant ??undefined,
       card: card ?? undefined,
@@ -253,12 +272,12 @@ if(playersa && playersb){
     if (isGoalFromEvent && goalScorer) {
       const goalEvent: Event = {
         type: "goal",
-        team: selectedTeam,
+        team:  selectedEvent=="penalty"?otherTeam:selectedTeam,
         player: goalScorer,
         assistant: goalAssistant ?? undefined,
         timestamp,
       };
-      console.log("events",newEvent,goalEvent)
+      // console.log("events",newEvent,goalEvent)
       setEvents([...events, newEvent, goalEvent]);
       setNewEvents([...newEvents, newEvent, goalEvent]); // Track new events separately
     } else {
@@ -285,10 +304,10 @@ updateAvailablePlayers(newEvent);
 const updateAvailablePlayers = (event: Event) => {
   const { type, player, team, card, substitute } = event;
 
-  console.log("playersB", availablePlayersB);
-  console.log("playersA", availablePlayersA);
-  console.log("SubplayersA", substitutePlayersA);
-  console.log("SubplayersB", substitutePlayersB);
+  // console.log("playersB", availablePlayersB);
+  // console.log("playersA", availablePlayersA);
+  // console.log("SubplayersA", substitutePlayersA);
+  // console.log("SubplayersB", substitutePlayersB);
 
   if (team === homeTeam?.name) {
     let updatedPlayersA = [...availablePlayersA];
@@ -351,7 +370,7 @@ const updateAvailablePlayers = (event: Event) => {
     // Update the available players list for Team B
     setAvailablePlayersB(updatedPlayersB);
   }
-  console.log(events)
+  // console.log(events)
 };
 
   return (
@@ -414,12 +433,12 @@ const updateAvailablePlayers = (event: Event) => {
       newTime.setMinutes(parseInt(minutes ?? '0'));
       newTime.setSeconds(parseInt(seconds ?? '0'));
       
-      console.log('Setting first half start time:', {
-        inputValue: e.target.value,
-        baseDate: baseDate.toISOString(),
-        newTime: newTime.toISOString(),
-        localTime: newTime.toLocaleString()
-      });
+      // console.log('Setting first half start time:', {
+      //   inputValue: e.target.value,
+      //   baseDate: baseDate.toISOString(),
+      //   newTime: newTime.toISOString(),
+      //   localTime: newTime.toLocaleString()
+      // });
       
       setFirstHalfStartTime(newTime);
     }
@@ -530,6 +549,7 @@ const updateAvailablePlayers = (event: Event) => {
             value={selectedTeam}
             onChange={(e) => {
               setSelectedTeam(e.target.value);
+              setOtherTeam(makeOtherTeam(e.target.value))
               setSelectedPlayer(null); // Reset player when team changes
             }}
           >
@@ -781,13 +801,13 @@ const updateAvailablePlayers = (event: Event) => {
 
                 // Debug log
                 if (index === 0) {
-                  console.log('Time conversion:', {
-                    original: event.timestamp,
-                    converted: displayTime,
-                    firstHalfStart: firstHalfStartTime?.toLocaleTimeString(),
-                    secondHalfStart: secondHalfStartTime?.toLocaleTimeString(),
-                    matchDate: match.date
-                  });
+                  // console.log('Time conversion:', {
+                  //   original: event.timestamp,
+                  //   converted: displayTime,
+                  //   firstHalfStart: firstHalfStartTime?.toLocaleTimeString(),
+                  //   secondHalfStart: secondHalfStartTime?.toLocaleTimeString(),
+                  //   matchDate: match.date
+                  // });
                 }
 
                 return (

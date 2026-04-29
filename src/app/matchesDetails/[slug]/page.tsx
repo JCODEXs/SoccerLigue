@@ -57,10 +57,10 @@ const { slug } = use(params);
         console.log("Two hours after match:", twoHoursAfterMatch);
 
         // Check if the match is editable
-        setIsEditable(currentDate > matchCreation && currentDate < twoHoursAfterMatch);
+        setIsReadyForResults(currentDate > matchDate);
+        setIsEditable(currentDate > matchCreation && currentDate < twoHoursAfterMatch&&!isReadyForResults);
 
         // Check if the match has ended
-        setIsReadyForResults(currentDate > matchDate);
 
         // Check if results are available (assuming `matchData.results` exists)
         // setIsResultsAvailable(matchData.results && matchData.results.length > 0);
@@ -68,7 +68,7 @@ const { slug } = use(params);
         console.error("Error decoding match data:", error);
       }
     }
-  }, [match]);
+  }, [match,isReadyForResults]);
 
 // If the match is editable, show the Details component
   if (isEditable&&match) {
