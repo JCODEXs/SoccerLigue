@@ -18,7 +18,7 @@ const FillResults: React.FC<{ match: Match; mode: 'live' | 'past' }> = ({ match,
   const [manualTime, setManualTime] = useState<string>(''); // For past match mode
   const [hasExistingEvents, setHasExistingEvents] = useState<boolean>(false);
   const [existingEventsCount, setExistingEventsCount] = useState<number>(0);
-  console.log(otherTeam,"otherteam")
+  
 
   // Match start time tracking for live mode
   const [firstHalfStartTime, setFirstHalfStartTime] = useState<Date | null>(null);
@@ -43,8 +43,8 @@ const makeOtherTeam = (team: string): string => {
   if (!homeTeam?.name && !awayTeam?.name) return '';
   
   const trimmedTeam = team.trim();
-  const homeName = homeTeam?.name || '';
-  const awayName = awayTeam?.name || '';
+  const homeName = homeTeam?.name ?? '';
+  const awayName = awayTeam?.name ?? '';
   // console.log("teams other",homeName,homeTeam,awayName,trimmedTeam)
   
   // If one team is missing, return the other if it matches
@@ -52,7 +52,7 @@ const makeOtherTeam = (team: string): string => {
   if (awayName && trimmedTeam === awayName) return homeName;
   
   // Default fallback
-  return awayName || homeName || '';
+  return awayName ?? homeName ?? '';
 };
 
   // Helper function to convert any timestamp format to match minute
